@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+        integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <title class="title">Pomodoro-Timer</title>
+</head>
+
+<body class="body">
+    <div class="container-menu">
+        <div class="bars">
+            <ul>
+                <li>
+                    <button id="bars-menu-point">
+                        <a href="https://pt.wikipedia.org/wiki/T%C3%A9cnica_pomodoro" target="_blank">
+                            <i class="fa-solid fa-book"></i>
+                        </a>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <main class="container-main">
+        <div class="container-modal">
+            <div class="container-modal-content">
+                <div class="modal">
+                    <div class="hidden_modal">
+                        <button id="button_hidden_modal"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div>
+                        <input id="tarefa" type="text" placeholder="Digite sua tarefa">
+                    </div>
+                    <div>
+                        <button id="gravar">Gravar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-contador">
+            <div class="add-pomodoro">
+                <button id="add"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div>
+                <p class="contatador">25:00</p>
+            </div>
+        </div>
+        <div class="container-button">
+            <button class="button-contador">Iniciar</button>
+            <button class="break">descanso</button>
+        </div>
+        <audio class="alarme">
+            <source src="../alarme/alarme.mp3" type="audio/mpeg">
+        </audio>
+        <div class="filds-of-inputs"></div>
+    </main>
+</body>
+<script src="../js/index.js"></script>
+
+</html>
