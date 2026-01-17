@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre o Pomodoro - Técnica e Módulos</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .content-page {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .content-page .glass-card {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            background: var(--secondary-color);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .section {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .section h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+        }
+
+        .section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 30px 0 15px 0;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+            color: var(--text-primary);
+        }
+
+        .section p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            text-align: left;
+        }
+
+        .section ul, .section ol {
+            margin: 15px auto;
+            padding-left: 25px;
+            color: var(--text-secondary);
+            text-align: left;
+            max-width: 800px;
+        }
+
+        .section li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        .module-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px var(--shadow-medium);
+            text-align: left;
+        }
+
+        .module-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 0;
+            color: var(--text-primary);
+            text-align: left;
+        }
+
+        .module-card h3::before {
+            content: '▸';
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+            text-align: left;
+        }
+
+        .feature-list li {
+            padding-left: 25px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .highlight-box {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--primary-color);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 800px;
+            text-align: left;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .steps-list {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+            text-align: left;
+            max-width: 700px;
+            margin: 15px auto;
+        }
+
+        .steps-list li {
+            counter-increment: step-counter;
+            padding-left: 50px;
+            position: relative;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .steps-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 35px;
+            height: 35px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .content-page {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            .section h1 {
+                font-size: 28px;
+            }
+
+            .section h2 {
+                font-size: 20px;
+            }
+
+            .module-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <div class="content-page">
+        <a href="index.html" class="back-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Voltar ao Timer
+        </a>
+
+        <div class="glass-card">
+            <div class="section">
+                <h1>🍅 Técnica Pomodoro</h1>
+                
+                <p>
+                    A <strong>Técnica Pomodoro</strong> é um método de gerenciamento de tempo desenvolvido por Francesco Cirillo 
+                    no final dos anos 1980. O nome vem da palavra italiana "pomodoro" (tomate), em referência ao 
+                    temporizador de cozinha em formato de tomate que Cirillo usava durante seus estudos universitários.
+                </p>
+
+                <div class="highlight-box">
+                    <p>
+                        <strong>Conceito Principal:</strong> Dividir o trabalho em intervalos focados de 25 minutos 
+                        (chamados "pomodoros"), separados por pausas curtas. Isso ajuda a manter a concentração e 
+                        reduzir a fadiga mental.
+                    </p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📋 Como Funciona a Técnica</h2>
+                
+                <ol class="steps-list" style="text-align: left;">
+                    <li>
+                        <strong>Escolha uma tarefa</strong> que deseja realizar
+                    </li>
+                    <li>
+                        <strong>Configure o timer</strong> para 25 minutos (um Pomodoro)
+                    </li>
+                    <li>
+                        <strong>Trabalhe na tarefa</strong> com foco total até o timer tocar
+                    </li>
+                    <li>
+                        <strong>Faça uma pausa curta</strong> de 5 minutos quando o Pomodoro terminar
+                    </li>
+                    <li>
+                        <strong>Repita o processo</strong> e, a cada 4 Pomodoros completos, faça uma pausa longa de 15-30 minutos
+                    </li>
+                </ol>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Benefícios da Técnica</h2>
+                
+                <ul class="feature-list">
+                    <li>Aumenta a produtividade e o foco</li>
+                    <li>Reduz a procrastinação</li>
+                    <li>Melhora a gestão do tempo</li>
+                    <li>Diminui a fadiga mental</li>
+                    <li>Ajuda a criar uma sensação de urgência positiva</li>
+                    <li>Permite medir o tempo gasto em tarefas</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>⚙️ Módulos da Aplicação</h2>
+                
+                <p style="text-align: center; max-width: 800px; margin: 0 auto 20px auto;">
+                    Nossa aplicação implementa todos os componentes essenciais da Técnica Pomodoro, 
+                    organizados em módulos funcionais:
+                </p>
+
+                <div class="module-card">
+                    <h3>1. Timer Principal</h3>
+                    <p>
+                        O coração da aplicação. Exibe o tempo restante em formato MM:SS e permite 
+                        controlar o fluxo de trabalho através de diferentes modos.
+                    </p>
+                    <ul class="feature-list">
+                        <li><strong>Modo Pomodoro:</strong> 25 minutos de trabalho focado (configurável)</li>
+                        <li><strong>Pausa Curta:</strong> 5 minutos de descanso entre pomodoros (configurável)</li>
+                        <li><strong>Pausa Longa:</strong> 15 minutos de descanso após 4 ciclos (configurável)</li>
+                        <li>Contador regressivo preciso em tempo real</li>
+                        <li>Indicador visual de modo ativo</li>
+                        <li>Efeito de pulso durante o timer ativo</li>
+                    </ul>
+                </div>
+
+                <div class="module-card">
+                    <h3>2. Controles de Timer</h3>
+                    <p>
+                        Botões intuitivos para gerenciar o fluxo do Pomodoro:
+                    </p>
+                    <ul class="feature-list">
+                        <li><strong>Iniciar:</strong> Começa a contagem regressiva</li>
+                        <li><strong>Pausar:</strong> Pausa o timer sem perder o progresso</li>
+                        <li><strong>Resetar:</strong> Volta ao tempo inicial do modo atual</li>
+                        <li><strong>Pular:</strong> Avança para o próximo modo (pomodoro ↔ pausa)</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-size: 14px; color: var(--text-secondary);">
+                        <strong>Atalhos de Teclado:</strong> Espaço (Iniciar/Pausar), Ctrl+R (Resetar), Ctrl+S (Pular)
+                    </p>
+                </div>
+
+                <div class="module-card">
+                    <h3>3. Controle de Ciclos</h3>
+                    <p>
+                        Sistema automático que gerencia a progressão entre pomodoros e pausas:
+                    </p>
+                    <ul class="feature-list">
+                        <li>Contabiliza automaticamente os pomodoros concluídos</li>
+                        <li>Indicador visual com 4 bolinhas mostrando o progresso do ciclo</li>
+                        <li>Após 4 pomodoros completos, ativa automaticamente a Pausa Longa</li>
+                        <li>Contador total de ciclos realizados</li>
+                        <li>Reinicia o ciclo após a pausa longa</li>
+                    </ul>
+                    <div class="highlight-box" style="margin-top: 15px;">
+                        <p>
+                            <strong>Exemplo:</strong> Pomodoro → Pausa Curta → Pomodoro → Pausa Curta → 
+                            Pomodoro → Pausa Curta → Pomodoro → <strong>Pausa Longa</strong> → (reinicia)
+                        </p>
+                    </div>
+                </div>
+
+                <div class="module-card">
+                    <h3>4. Configurações Personalizáveis</h3>
+                    <p>
+                        Permite adaptar a técnica às suas necessidades pessoais:
+                    </p>
+                    <ul class="feature-list">
+                        <li>Ajustar tempo do Pomodoro (padrão: 25 minutos)</li>
+                        <li>Ajustar tempo da Pausa Curta (padrão: 5 minutos)</li>
+                        <li>Ajustar tempo da Pausa Longa (padrão: 15 minutos)</li>
+                        <li>Definir quantos ciclos para ativar pausa longa (padrão: 4)</li>
+                        <li>Todas as configurações são salvas automaticamente</li>
+                        <li>Persistência via localStorage (mantém após fechar o navegador)</li>
+                    </ul>
+                </div>
+
+                <div class="module-card">
+                    <h3>5. Sistema de Notificações</h3>
+                    <p>
+                        Alertas multimodais para garantir que você não perca o momento de pausar:
+                    </p>
+                    <ul class="feature-list">
+                        <li><strong>Som de Notificação:</strong> Beep duplo ao finalizar cada etapa</li>
+                        <li><strong>Toast Visual:</strong> Mensagem na tela informando a conclusão</li>
+                        <li><strong>Notificação do Navegador:</strong> Alerta do sistema (requer permissão)</li>
+                        <li>Funciona mesmo com a aba em segundo plano</li>
+                    </ul>
+                </div>
+
+                <div class="module-card">
+                    <h3>6. Histórico e Estatísticas</h3>
+                    <p>
+                        Acompanhe seu progresso e mantenha a motivação:
+                    </p>
+                    <ul class="feature-list">
+                        <li><strong>Contador Diário:</strong> Quantos pomodoros você completou hoje</li>
+                        <li><strong>Contador Total:</strong> Total acumulado desde o início</li>
+                        <li>Reset automático do contador diário à meia-noite</li>
+                        <li>Dados salvos permanentemente no navegador</li>
+                    </ul>
+                    <div class="highlight-box" style="margin-top: 15px;">
+                        <p>
+                            <strong>Dica:</strong> Use as estatísticas para estabelecer metas diárias e 
+                            acompanhar sua evolução na produtividade!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>💡 Dicas para Melhor Uso</h2>
+                
+                <ul class="feature-list">
+                    <li>Escolha tarefas específicas para cada Pomodoro</li>
+                    <li>Elimine distrações durante os 25 minutos (desative notificações)</li>
+                    <li>Respeite as pausas - elas são essenciais para manter o foco</li>
+                    <li>Use a pausa longa para atividades relaxantes (caminhar, alongar, etc.)</li>
+                    <li>Ajuste os tempos nas configurações se 25 minutos não funcionar para você</li>
+                    <li>Revise suas estatísticas regularmente para identificar padrões</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>🔧 Tecnologias Utilizadas</h2>
+                
+                <p>
+                    Esta aplicação foi desenvolvida com tecnologias web puras, garantindo:
+                </p>
+                <ul class="feature-list">
+                    <li><strong>HTML5:</strong> Estrutura semântica e acessível</li>
+                    <li><strong>CSS3:</strong> Estilo Aero (glassmorphism) com animações suaves</li>
+                    <li><strong>JavaScript Vanilla:</strong> Lógica completa sem dependências externas</li>
+                    <li><strong>Web Audio API:</strong> Notificações sonoras</li>
+                    <li><strong>LocalStorage:</strong> Persistência de dados no navegador</li>
+                    <li><strong>Responsive Design:</strong> Funciona perfeitamente em desktop e mobile</li>
+                </ul>
+            </div>
+
+            <div class="section" style="margin-bottom: 0;">
+                <div class="highlight-box">
+                    <p style="text-align: center; font-size: 16px;">
+                        <strong>🎯 Objetivo:</strong> Ajudar você a ser mais produtivo através da técnica Pomodoro, 
+                        com uma interface moderna, intuitiva e totalmente funcional.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
