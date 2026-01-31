@@ -1,29 +1,11 @@
 // ============================================
-// Estado da Aplicação
+// Estado da Aplicação (UI + estatísticas; timer global em PomodoroEngine)
 // ============================================
 const state = {
-    // Timer
-    timeLeft: 25 * 60, // em segundos
-    isRunning: false,
-    intervalId: null,
-    
-    // Modos
-    currentMode: 'pomodoro', // 'pomodoro', 'shortBreak', 'longBreak'
-    modes: {
-        pomodoro: 25 * 60,
-        shortBreak: 5 * 60,
-        longBreak: 15 * 60
-    },
-    
-    // Ciclos
-    completedCycles: 0,
-    cyclesForLongBreak: 4,
-    
-    // Estatísticas
+    // Estatísticas (local)
     todayCount: 0,
     totalCount: 0,
     lastDate: null,
-    
     // Áudio
     audioContext: null
 };
@@ -68,12 +50,12 @@ const elements = {
 function init() {
     loadSettings();
     loadStatistics();
-    updateDisplay();
+    syncDisplayFromEngine();
     setupEventListeners();
     checkDateReset();
     initAudioContext();
-    
-    // Solicitar permissão para notificações
+    document.addEventListener('pomodoro:update', syncDisplayFromEngine);
+    document.addEventListener('pomodoro:complete', onPomodoroComplete);
     if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
     }
@@ -131,127 +113,57 @@ function setupEventListeners() {
 }
 
 // ============================================
-// Timer Functions
+// Timer Functions (delegam ao PomodoroEngine global)
 // ============================================
 function startTimer() {
-    if (state.isRunning) return;
-    
-    state.isRunning = true;
-    elements.startBtn.disabled = true;
-    elements.pauseBtn.disabled = false;
-    elements.timerPulse.classList.add('active');
-    
-    state.intervalId = setInterval(() => {
-        state.timeLeft--;
-        updateDisplay();
-        
-        if (state.timeLeft <= 0) {
-            completeTimer();
-        }
-    }, 1000);
+    if (window.PomodoroEngine) window.PomodoroEngine.start();
 }
 
 function pauseTimer() {
-    if (!state.isRunning) return;
-    
-    state.isRunning = false;
-    clearInterval(state.intervalId);
-    elements.startBtn.disabled = false;
-    elements.pauseBtn.disabled = true;
-    elements.timerPulse.classList.remove('active');
+    if (window.PomodoroEngine) window.PomodoroEngine.pause();
 }
 
 function resetTimer() {
-    pauseTimer();
-    state.timeLeft = state.modes[state.currentMode];
-    updateDisplay();
+    if (window.PomodoroEngine) window.PomodoroEngine.reset();
 }
 
 function skipToNext() {
-    pauseTimer();
-    switchToNextMode();
+    if (window.PomodoroEngine) window.PomodoroEngine.skipToNext();
 }
 
-function completeTimer() {
-    pauseTimer();
-    
-    // Tocar som de notificação
+function onPomodoroComplete() {
     playNotificationSound();
-    
-    // Se completou um Pomodoro
-    if (state.currentMode === 'pomodoro') {
-        state.completedCycles++;
-        incrementPomodoroCount();
-        updateCyclesDisplay();
-        
-        // Verificar se deve ir para pausa longa
-        if (state.completedCycles % state.cyclesForLongBreak === 0) {
-            state.currentMode = 'longBreak';
-        } else {
-            state.currentMode = 'shortBreak';
-        }
-    } else {
-        // Se completou uma pausa, voltar para Pomodoro
-        state.currentMode = 'pomodoro';
-    }
-    
-    state.timeLeft = state.modes[state.currentMode];
-    updateDisplay();
-    
-    // Mostrar notificação
     showNotification();
-    
-    saveSettings();
-}
-
-function switchToNextMode() {
-    if (state.currentMode === 'pomodoro') {
-        // Se está em pomodoro, vai para pausa apropriada
-        if ((state.completedCycles + 1) % state.cyclesForLongBreak === 0) {
-            state.currentMode = 'longBreak';
-        } else {
-            state.currentMode = 'shortBreak';
-        }
-    } else {
-        // Se está em pausa, volta para pomodoro
-        state.currentMode = 'pomodoro';
-    }
-    
-    state.timeLeft = state.modes[state.currentMode];
-    updateDisplay();
+    loadStatistics();
+    updateStatistics();
 }
 
 // ============================================
-// Display Functions
+// Display Functions (leem do PomodoroEngine)
 // ============================================
-function updateDisplay() {
-    const minutes = Math.floor(state.timeLeft / 60);
-    const seconds = state.timeLeft % 60;
-    elements.timerDisplay.textContent = 
-        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    
-    // Atualizar texto do modo
-    const modeNames = {
+function syncDisplayFromEngine() {
+    var engine = window.PomodoroEngine;
+    if (!engine || !elements.timerDisplay) return;
+    var s = engine.getState();
+    var minutes = Math.floor(s.remaining / 60);
+    var seconds = s.remaining % 60;
+    elements.timerDisplay.textContent =
+        (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    var modeNames = {
         pomodoro: (window.I18n && window.I18n.t('pomodoroMode')) || 'Pomodoro',
         shortBreak: (window.I18n && window.I18n.t('shortBreak')) || 'Pausa Curta',
         longBreak: (window.I18n && window.I18n.t('longBreak')) || 'Pausa Longa'
     };
-    elements.currentMode.textContent = modeNames[state.currentMode];
-}
-
-function updateCyclesDisplay() {
-    const dots = Array.from(elements.cyclesDots);
-    const cycleIndex = state.completedCycles % state.cyclesForLongBreak;
-    
-    dots.forEach((dot, index) => {
-        if (index < cycleIndex) {
-            dot.classList.add('completed');
-        } else {
-            dot.classList.remove('completed');
-        }
+    elements.currentMode.textContent = modeNames[s.mode] || modeNames.pomodoro;
+    elements.startBtn.disabled = !!s.isRunning;
+    elements.pauseBtn.disabled = !s.isRunning;
+    elements.timerPulse.classList.toggle('active', !!s.isRunning);
+    var dots = Array.from(elements.cyclesDots);
+    var cycleIndex = (s.completedCycles || 0) % (s.cyclesForLongBreak || 4);
+    dots.forEach(function(dot, index) {
+        dot.classList.toggle('completed', index < cycleIndex);
     });
-    
-    elements.cyclesCount.textContent = state.completedCycles;
+    elements.cyclesCount.textContent = s.completedCycles || 0;
 }
 
 function updateStatistics() {
@@ -263,12 +175,11 @@ function updateStatistics() {
 // Configurações
 // ============================================
 function openSettings() {
-    // Carregar valores atuais nos inputs
-    elements.pomodoroTime.value = state.modes.pomodoro / 60;
-    elements.shortBreakTime.value = state.modes.shortBreak / 60;
-    elements.longBreakTime.value = state.modes.longBreak / 60;
-    elements.cyclesForLongBreak.value = state.cyclesForLongBreak;
-    
+    var settings = window.PomodoroEngine ? window.PomodoroEngine.getSettings() : { pomodoro: 25 * 60, shortBreak: 5 * 60, longBreak: 15 * 60, cyclesForLongBreak: 4 };
+    elements.pomodoroTime.value = settings.pomodoro / 60;
+    elements.shortBreakTime.value = settings.shortBreak / 60;
+    elements.longBreakTime.value = settings.longBreak / 60;
+    elements.cyclesForLongBreak.value = settings.cyclesForLongBreak || 4;
     elements.settingsModal.classList.add('active');
 }
 
@@ -277,50 +188,24 @@ function closeSettings() {
 }
 
 function saveSettings() {
-    // Validar e salvar tempos
-    const pomodoro = Math.max(1, Math.min(60, parseInt(elements.pomodoroTime.value) || 25));
-    const shortBreak = Math.max(1, Math.min(60, parseInt(elements.shortBreakTime.value) || 5));
-    const longBreak = Math.max(1, Math.min(60, parseInt(elements.longBreakTime.value) || 15));
-    const cycles = Math.max(1, Math.min(10, parseInt(elements.cyclesForLongBreak.value) || 4));
-    
-    state.modes.pomodoro = pomodoro * 60;
-    state.modes.shortBreak = shortBreak * 60;
-    state.modes.longBreak = longBreak * 60;
-    state.cyclesForLongBreak = cycles;
-    
-    // Se o timer não está rodando, atualizar o tempo atual
-    if (!state.isRunning) {
-        state.timeLeft = state.modes[state.currentMode];
-        updateDisplay();
-    }
-    
-    // Salvar no localStorage
+    var pomodoro = Math.max(1, Math.min(60, parseInt(elements.pomodoroTime.value, 10) || 25));
+    var shortBreak = Math.max(1, Math.min(60, parseInt(elements.shortBreakTime.value, 10) || 5));
+    var longBreak = Math.max(1, Math.min(60, parseInt(elements.longBreakTime.value, 10) || 15));
+    var cycles = Math.max(1, Math.min(10, parseInt(elements.cyclesForLongBreak.value, 10) || 4));
     localStorage.setItem('pomodoroSettings', JSON.stringify({
         pomodoro: pomodoro,
         shortBreak: shortBreak,
         longBreak: longBreak,
         cyclesForLongBreak: cycles
     }));
-    
+    if (window.PomodoroEngine) window.PomodoroEngine.reset();
+    syncDisplayFromEngine();
     closeSettings();
     showToast('Configurações salvas!');
 }
 
 function loadSettings() {
-    const saved = localStorage.getItem('pomodoroSettings');
-    if (saved) {
-        try {
-            const settings = JSON.parse(saved);
-            state.modes.pomodoro = (settings.pomodoro || 25) * 60;
-            state.modes.shortBreak = (settings.shortBreak || 5) * 60;
-            state.modes.longBreak = (settings.longBreak || 15) * 60;
-            state.cyclesForLongBreak = settings.cyclesForLongBreak || 4;
-        } catch (e) {
-            console.error('Erro ao carregar configurações:', e);
-        }
-    }
-    
-    state.timeLeft = state.modes[state.currentMode];
+    if (window.PomodoroEngine) window.PomodoroEngine.getState();
 }
 
 // ============================================
@@ -446,25 +331,18 @@ function playNotificationSound() {
 }
 
 function showNotification() {
-    const modeNames = {
+    var s = window.PomodoroEngine ? window.PomodoroEngine.getState() : { mode: 'pomodoro' };
+    var modeNames = {
         pomodoro: (window.I18n && window.I18n.t('pomodoroMode')) || 'Pomodoro',
         shortBreak: (window.I18n && window.I18n.t('shortBreak')) || 'Pausa Curta',
         longBreak: (window.I18n && window.I18n.t('longBreak')) || 'Pausa Longa'
     };
-    
-    const message = state.currentMode === 'pomodoro' 
-        ? '🍅 Pomodoro concluído! Hora de descansar.'
-        : `⏰ ${modeNames[state.currentMode]} finalizada!`;
-    
+    var message = s.mode === 'pomodoro'
+        ? '⏰ Pausa finalizada! Hora de focar.'
+        : '🍅 Pomodoro concluído! Hora de descansar.';
     showToast(message);
-    
-    // Notificação do navegador (se permitido)
     if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('Pomodoro Timer', {
-            body: message,
-            icon: '🍅',
-            badge: '🍅'
-        });
+        new Notification('Pomodoro Timer', { body: message, icon: '🍅', badge: '🍅' });
     }
 }
 
@@ -481,29 +359,18 @@ function showToast(message) {
 // Atalhos de Teclado
 // ============================================
 function handleKeyboard(e) {
-    // Ignorar se estiver digitando em um input
     if (e.target.tagName === 'INPUT') return;
-    
-    switch(e.code) {
+    var s = window.PomodoroEngine ? window.PomodoroEngine.getState() : { isRunning: false };
+    switch (e.code) {
         case 'Space':
             e.preventDefault();
-            if (state.isRunning) {
-                pauseTimer();
-            } else {
-                startTimer();
-            }
+            if (s.isRunning) pauseTimer(); else startTimer();
             break;
         case 'KeyR':
-            if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                resetTimer();
-            }
+            if (e.ctrlKey || e.metaKey) { e.preventDefault(); resetTimer(); }
             break;
         case 'KeyS':
-            if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                skipToNext();
-            }
+            if (e.ctrlKey || e.metaKey) { e.preventDefault(); skipToNext(); }
             break;
     }
 }

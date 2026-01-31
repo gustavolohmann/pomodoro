@@ -145,6 +145,7 @@
             <!-- Backup -->
             <div class="hub-backup fade-in">
                 <h2 class="hub-section-title">💾 <span data-i18n="backupTitle">Backup & Segurança</span></h2>
+                <p class="hub-disclaimer" data-i18n="dataDisclaimer">Não armazenamos seus dados. Tudo fica apenas no seu navegador. O backup dos seus estudos é de sua responsabilidade — use Exportar para guardar uma cópia.</p>
                 <div class="hub-backup-buttons">
                     <button type="button" class="btn btn-secondary" id="exportBtn" data-i18n="exportBtn">Exportar dados (JSON)</button>
                     <button type="button" class="btn btn-secondary" id="importBtn" data-i18n="importBtn">Importar dados</button>
@@ -171,6 +172,8 @@
     <script src="../lang/en.js"></script>
     <script src="../lang/es.js"></script>
     <script src="../js/common.js"></script>
+    <script src="../js/pomodoro.js"></script>
+    <script src="../js/pomodoro-header.js"></script>
     <script src="../js/hub-data.js"></script>
     <script src="../js/modal.js"></script>
     <script>
@@ -180,16 +183,18 @@
                 var log = HubData.getActivityLog();
                 var dates = log.dates || [];
                 var today = HubData.getToday();
-                var dayOffset = 0;
                 var streak = 0;
                 var dateSet = new Set(dates);
-                while (true) {
-                    var d = new Date();
-                    d.setDate(d.getDate() - dayOffset);
-                    var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-                    if (!dateSet.has(key)) break;
-                    streak++;
-                    dayOffset++;
+                if (dates.length > 0) {
+                    var dayOffset = 0;
+                    while (true) {
+                        var d = new Date();
+                        d.setUTCDate(d.getUTCDate() - dayOffset);
+                        var key = d.toISOString().slice(0, 10);
+                        if (!dateSet.has(key)) break;
+                        streak++;
+                        dayOffset++;
+                    }
                 }
                 var streakEl = document.getElementById('statStreak');
                 if (streakEl) streakEl.textContent = streak;
