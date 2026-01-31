@@ -172,6 +172,7 @@
     <script src="../lang/es.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/modal.js"></script>
     <script>
         (function() {
             function loadStats() {
@@ -226,6 +227,8 @@
             }
         })();
 
+        function t(key) { return window.I18n ? window.I18n.t(key) : key; }
+
         document.getElementById('exportBtn').addEventListener('click', function() {
             var data = HubData.exportAll();
             var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -234,7 +237,13 @@
             a.download = 'hub-estudo-backup-' + new Date().toISOString().slice(0, 10) + '.json';
             a.click();
             URL.revokeObjectURL(a.href);
-            showToast(window.I18n ? window.I18n.t('toastExport') : 'Backup exportado!');
+            Modal.show({
+                type: 'success',
+                title: t('modalSuccess'),
+                message: t('modalExportSuccess'),
+                showCancel: false,
+                confirmLabel: t('modalOk')
+            });
         });
 
         document.getElementById('importBtn').addEventListener('click', function() {
@@ -249,10 +258,22 @@
                 try {
                     var data = JSON.parse(ev.target.result);
                     HubData.importAll(data);
-                    showToast(window.I18n ? window.I18n.t('toastImport') : 'Dados importados! Recarregue a página.');
-                    setTimeout(function() { location.reload(); }, 1500);
+                    Modal.show({
+                        type: 'success',
+                        title: t('modalSuccess'),
+                        message: t('toastImport'),
+                        showCancel: false,
+                        confirmLabel: t('modalOk'),
+                        onConfirm: function() { location.reload(); }
+                    });
                 } catch (err) {
-                    showToast(window.I18n ? window.I18n.t('toastImportError') : 'Erro ao importar. Verifique o arquivo.');
+                    Modal.show({
+                        type: 'error',
+                        title: t('modalError'),
+                        message: t('modalImportError'),
+                        showCancel: false,
+                        confirmLabel: t('modalOk')
+                    });
                 }
             };
             reader.readAsText(file);
@@ -260,10 +281,19 @@
         });
 
         document.getElementById('resetBtn').addEventListener('click', function() {
-            if (!confirm(window.I18n ? window.I18n.t('confirmReset') : 'Tem certeza? Todos os dados do Hub serão apagados.')) return;
-            HubData.resetHub();
-            showToast(window.I18n ? window.I18n.t('toastReset') : 'Hub resetado. Recarregando...');
-            setTimeout(function() { location.reload(); }, 1000);
+            Modal.show({
+                type: 'warning',
+                title: t('modalWarning'),
+                message: t('modalConfirmReset'),
+                cancelLabel: t('modalCancel'),
+                confirmLabel: t('modalResetConfirmBtn'),
+                showCancel: true,
+                onConfirm: function() {
+                    HubData.resetHub();
+                    showToast(t('toastReset'));
+                    setTimeout(function() { location.reload(); }, 1000);
+                }
+            });
         });
 
         function showToast(msg) {

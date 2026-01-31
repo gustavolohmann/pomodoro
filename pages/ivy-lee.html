@@ -48,6 +48,7 @@
     <script src="../lang/es.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/modal.js"></script>
     <script>
         const MAX_TASKS = 6;
         const today = HubData.getToday();
@@ -116,13 +117,20 @@
             });
         }
 
+        function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         document.getElementById('addTaskBtn').addEventListener('click', function() {
             const nameEl = document.getElementById('newTaskName');
             const descEl = document.getElementById('newTaskDesc');
             const name = nameEl.value.trim();
-            if (!name) { alert(window.I18n ? window.I18n.t('taskNameRequired') : 'Digite o nome da tarefa.'); nameEl.focus(); return; }
+            if (!name) {
+                Modal.show({ type: 'warning', title: t('modalWarning'), message: t('taskNameRequired'), showCancel: false, confirmLabel: t('modalOk'), onConfirm: function() { nameEl.focus(); } });
+                return;
+            }
             const tasks = HubData.getIvyLee(today);
-            if (tasks.length >= MAX_TASKS) { alert(window.I18n ? window.I18n.t('maxTasks') : 'Máximo de 6 tarefas.'); return; }
+            if (tasks.length >= MAX_TASKS) {
+                Modal.show({ type: 'warning', title: t('modalWarning'), message: t('maxTasks'), showCancel: false, confirmLabel: t('modalOk') });
+                return;
+            }
             tasks.push({ id: 'id_' + Date.now(), name: name, description: descEl.value.trim() || '', done: false, order: tasks.length });
             HubData.setIvyLee(today, tasks);
             HubData.addActiveDay();

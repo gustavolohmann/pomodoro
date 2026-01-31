@@ -43,6 +43,7 @@
     <script src="../lang/es.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/modal.js"></script>
     <script>
         function loadCards() {
             const cards = HubData.getFlashcards();
@@ -76,10 +77,14 @@
             return div.innerHTML;
         }
 
+        function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         document.getElementById('addCardBtn').addEventListener('click', function() {
             const q = document.getElementById('newQuestion').value.trim();
             const a = document.getElementById('newAnswer').value.trim();
-            if (!q || !a) { alert(window.I18n ? window.I18n.t('fillQuestionAnswer') : 'Preencha pergunta e resposta.'); return; }
+            if (!q || !a) {
+                Modal.show({ type: 'warning', title: t('modalWarning'), message: t('fillQuestionAnswer'), showCancel: false, confirmLabel: t('modalOk') });
+                return;
+            }
             const cards = HubData.getFlashcards();
             cards.push({ id: 'c_' + Date.now(), question: q, answer: a, nextReview: HubData.getToday(), intervalIndex: 0 });
             HubData.setFlashcards(cards);

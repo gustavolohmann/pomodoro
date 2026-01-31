@@ -57,12 +57,17 @@
     <script src="../lang/es.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/modal.js"></script>
     <script>
+        function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         let currentCard = null;
 
         document.getElementById('pickCardBtn').addEventListener('click', function() {
             const cards = HubData.getFlashcards();
-            if (cards.length === 0) { alert('Crie flashcards primeiro.'); return; }
+            if (cards.length === 0) {
+                Modal.show({ type: 'warning', title: t('modalWarning'), message: t('createFlashcardsFirst'), showCancel: false, confirmLabel: t('modalOk') });
+                return;
+            }
             currentCard = cards[Math.floor(Math.random() * cards.length)];
             document.getElementById('recallQuestion').textContent = currentCard.question;
             document.getElementById('myAnswer').value = '';
