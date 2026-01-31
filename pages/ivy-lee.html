@@ -36,11 +36,12 @@
                 </div>
                 <div class="setting-group">
                     <label data-i18n="taskDescription">Descrição (opcional)</label>
-                    <textarea id="newTaskDesc" class="task-text ivy-desc-input" data-i18n-placeholder="taskDescriptionPlaceholder" placeholder="Detalhes ou subtarefas..." rows="2"></textarea>
+                    <div id="newTaskDescRte"></div>
                 </div>
                 <button type="button" class="btn btn-primary" id="addTaskBtn" data-i18n="addTask">+ Adicionar tarefa</button>
             </div>
 
+            <div id="ivyListToolbar" class="rte-toolbar-wrap" style="margin-bottom: 8px;"></div>
             <ul class="task-list" id="taskList"></ul>
         </div>
     </div>
@@ -51,11 +52,15 @@
     <script src="../js/pomodoro.js"></script>
     <script src="../js/pomodoro-header.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/rich-text-editor.js"></script>
     <script src="../js/modal.js"></script>
     <script>
         const MAX_TASKS = 6;
         const today = HubData.getToday();
         document.getElementById('todayLabel').textContent = (window.I18n ? window.I18n.t('today') : 'Hoje') + ': ' + today;
+
+        var newTaskDescRte = RichTextEditor.create(document.getElementById('newTaskDescRte'), { placeholder: (window.I18n ? window.I18n.t('taskDescriptionPlaceholder') : 'Detalhes ou subtarefas...'), minHeight: 70 });
+        RichTextEditor.createToolbarOnly(document.getElementById('ivyListToolbar'));
 
         function escapeAttr(s) {
             if (s == null) return '';
@@ -68,6 +73,7 @@
             ul.innerHTML = '';
             const tName = window.I18n ? window.I18n.t('taskNamePlaceholder') : 'Nome da tarefa';
             const tRemove = window.I18n ? window.I18n.t('remove') : 'Remover';
+            const tDescPlaceholder = window.I18n ? window.I18n.t('taskDescriptionPlaceholder') : 'Descrição (opcional)';
             tasks.forEach((t, i) => {
                 const name = t.name != null ? t.name : (t.text || '');
                 const desc = t.description != null ? t.description : '';
@@ -76,9 +82,11 @@
                 li.innerHTML = '<input type="checkbox" class="task-check" data-id="' + t.id + '" ' + (t.done ? 'checked' : '') + '>' +
                     '<div class="task-body">' +
                     '<input type="text" class="task-name" value="' + escapeAttr(name) + '" placeholder="' + escapeAttr(tName) + '" data-id="' + t.id + '">' +
-                    '<textarea class="task-desc" placeholder="' + escapeAttr(window.I18n ? window.I18n.t('taskDescriptionPlaceholder') : 'Descrição (opcional)') + '" data-id="' + t.id + '" rows="1">' + escapeAttr(desc) + '</textarea>' +
+                    '<div class="rte-editor task-desc" contenteditable="true" data-id="' + t.id + '" data-placeholder="' + escapeAttr(tDescPlaceholder) + '"></div>' +
                     '</div>' +
                     '<button type="button" class="btn btn-secondary task-remove" style="padding: 6px 12px; font-size: 14px;" data-id="' + t.id + '" aria-label="' + escapeAttr(tRemove) + '">' + escapeAttr(tRemove) + '</button>';
+                var descEl = li.querySelector('.task-desc');
+                if (desc) descEl.innerHTML = desc;
                 ul.appendChild(li);
             });
             bindTaskEvents();
@@ -107,7 +115,12 @@
                     const id = this.dataset.id;
                     const tasks = HubData.getIvyLee(today);
                     const t = tasks.find(x => x.id === id);
-                    if (t) { t.description = this.value.trim(); HubData.setIvyLee(today, tasks); HubData.addActiveDay(); }
+                    if (t) {
+                        var html = this.innerHTML.trim();
+                        t.description = (html === '' || html === '<br>') ? '' : html;
+                        HubData.setIvyLee(today, tasks);
+                        HubData.addActiveDay();
+                    }
                 };
             });
             document.querySelectorAll('.task-remove').forEach(el => {
@@ -123,7 +136,6 @@
         function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         document.getElementById('addTaskBtn').addEventListener('click', function() {
             const nameEl = document.getElementById('newTaskName');
-            const descEl = document.getElementById('newTaskDesc');
             const name = nameEl.value.trim();
             if (!name) {
                 Modal.show({ type: 'warning', title: t('modalWarning'), message: t('taskNameRequired'), showCancel: false, confirmLabel: t('modalOk'), onConfirm: function() { nameEl.focus(); } });
@@ -134,11 +146,12 @@
                 Modal.show({ type: 'warning', title: t('modalWarning'), message: t('maxTasks'), showCancel: false, confirmLabel: t('modalOk') });
                 return;
             }
-            tasks.push({ id: 'id_' + Date.now(), name: name, description: descEl.value.trim() || '', done: false, order: tasks.length });
+            var descHtml = newTaskDescRte.getHTML();
+            tasks.push({ id: 'id_' + Date.now(), name: name, description: descHtml || '', done: false, order: tasks.length });
             HubData.setIvyLee(today, tasks);
             HubData.addActiveDay();
             nameEl.value = '';
-            descEl.value = '';
+            newTaskDescRte.clear();
             nameEl.focus();
             loadTasks();
         });

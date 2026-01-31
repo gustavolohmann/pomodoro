@@ -39,7 +39,7 @@
                 </div>
                 <div class="setting-group">
                     <label>Sua resposta (opcional)</label>
-                    <textarea id="myAnswer" rows="3" placeholder="Escreva ou pense a resposta..." class="task-text" style="width: 100%; resize: vertical; padding: 12px;"></textarea>
+                    <div id="myAnswerRte"></div>
                 </div>
                 <button type="button" class="btn btn-secondary" id="revealBtn">Revelar resposta correta</button>
                 <div id="correctBlock" style="display: none; margin-top: 16px;">
@@ -60,10 +60,12 @@
     <script src="../js/pomodoro.js"></script>
     <script src="../js/pomodoro-header.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/rich-text-editor.js"></script>
     <script src="../js/modal.js"></script>
     <script>
         function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         let currentCard = null;
+        var myAnswerRte = RichTextEditor.create(document.getElementById('myAnswerRte'), { placeholder: 'Escreva ou pense a resposta...', minHeight: 80 });
 
         document.getElementById('pickCardBtn').addEventListener('click', function() {
             const cards = HubData.getFlashcards();
@@ -72,8 +74,9 @@
                 return;
             }
             currentCard = cards[Math.floor(Math.random() * cards.length)];
-            document.getElementById('recallQuestion').textContent = currentCard.question;
-            document.getElementById('myAnswer').value = '';
+            var qEl = document.getElementById('recallQuestion');
+            if (currentCard.question && currentCard.question.indexOf('<') !== -1) qEl.innerHTML = currentCard.question; else qEl.textContent = currentCard.question || '';
+            myAnswerRte.clear();
             document.getElementById('correctBlock').style.display = 'none';
             document.getElementById('recallArea').style.display = 'block';
             document.getElementById('pickArea').style.display = 'none';
@@ -81,7 +84,8 @@
 
         document.getElementById('revealBtn').addEventListener('click', function() {
             if (!currentCard) return;
-            document.getElementById('correctAnswer').textContent = currentCard.answer;
+            var aEl = document.getElementById('correctAnswer');
+            if (currentCard.answer && currentCard.answer.indexOf('<') !== -1) aEl.innerHTML = currentCard.answer; else aEl.textContent = currentCard.answer || '';
             document.getElementById('correctBlock').style.display = 'block';
         });
 

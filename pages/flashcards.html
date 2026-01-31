@@ -30,8 +30,9 @@
 
             <div class="setting-group" style="margin-bottom: 20px;">
                 <label data-i18n="question">Nova pergunta</label>
-                <input type="text" id="newQuestion" data-i18n-placeholder="newQuestionPlaceholder" placeholder="Pergunta" class="task-text" style="margin-bottom: 8px;">
-                <input type="text" id="newAnswer" data-i18n-placeholder="newAnswerPlaceholder" placeholder="Resposta" class="task-text">
+                <div id="newQuestionRte" style="margin-bottom: 12px;"></div>
+                <label data-i18n="answer">Resposta</label>
+                <div id="newAnswerRte"></div>
             </div>
             <button type="button" class="btn btn-primary" id="addCardBtn" data-i18n="saveCard">Salvar card</button>
 
@@ -46,8 +47,12 @@
     <script src="../js/pomodoro.js"></script>
     <script src="../js/pomodoro-header.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/rich-text-editor.js"></script>
     <script src="../js/modal.js"></script>
     <script>
+        var newQuestionRte = RichTextEditor.create(document.getElementById('newQuestionRte'), { placeholder: window.I18n ? window.I18n.t('newQuestionPlaceholder') : 'Pergunta', minHeight: 80 });
+        var newAnswerRte = RichTextEditor.create(document.getElementById('newAnswerRte'), { placeholder: window.I18n ? window.I18n.t('newAnswerPlaceholder') : 'Resposta', minHeight: 80 });
+
         function loadCards() {
             const cards = HubData.getFlashcards();
             const el = document.getElementById('cardsList');
@@ -55,15 +60,18 @@
                 el.innerHTML = '<p style="color: var(--text-secondary);">' + (window.I18n ? window.I18n.t('noCards') : 'Nenhum card ainda. Crie o primeiro acima.') + '</p>';
                 return;
             }
-            el.innerHTML = cards.map(c => `
-                <div class="task-list" style="margin-bottom: 12px;">
-                    <div style="padding: 12px 16px; background: var(--secondary-color); border-radius: 12px; border: 1px solid var(--glass-border);">
-                        <div style="font-weight: 600; margin-bottom: 8px;">${escapeHtml(c.question)}</div>
-                        <div style="color: var(--text-secondary); font-size: 14px;">${escapeHtml(c.answer)}</div>
-                        <button type="button" class="btn btn-secondary" style="margin-top: 8px; padding: 6px 12px; font-size: 12px;" data-id="${c.id}">${window.I18n ? window.I18n.t('delete') : 'Excluir'}</button>
-                    </div>
-                </div>
-            `).join('');
+            el.innerHTML = cards.map(c => {
+                var q = c.question || '';
+                var a = c.answer || '';
+                if (q.indexOf('<') === -1) { var d = document.createElement('div'); d.textContent = q; q = d.innerHTML; }
+                if (a.indexOf('<') === -1) { var d2 = document.createElement('div'); d2.textContent = a; a = d2.innerHTML; }
+                return '<div class="task-list" style="margin-bottom: 12px;">' +
+                    '<div style="padding: 12px 16px; background: var(--secondary-color); border-radius: 12px; border: 1px solid var(--glass-border);">' +
+                    '<div class="rte-content-display" style="font-weight: 600; margin-bottom: 8px;">' + q + '</div>' +
+                    '<div class="rte-content-display" style="color: var(--text-secondary); font-size: 14px;">' + a + '</div>' +
+                    '<button type="button" class="btn btn-secondary" style="margin-top: 8px; padding: 6px 12px; font-size: 12px;" data-id="' + c.id + '">' + (window.I18n ? window.I18n.t('delete') : 'Excluir') + '</button>' +
+                    '</div></div>';
+            }).join('');
             el.querySelectorAll('[data-id]').forEach(btn => {
                 btn.onclick = function() {
                     const id = this.dataset.id;
@@ -74,25 +82,21 @@
             });
         }
 
-        function escapeHtml(s) {
-            const div = document.createElement('div');
-            div.textContent = s || '';
-            return div.innerHTML;
-        }
-
         function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         document.getElementById('addCardBtn').addEventListener('click', function() {
-            const q = document.getElementById('newQuestion').value.trim();
-            const a = document.getElementById('newAnswer').value.trim();
-            if (!q || !a) {
+            var q = newQuestionRte.getHTML();
+            var a = newAnswerRte.getHTML();
+            var qPlain = newQuestionRte.element.textContent.trim();
+            var aPlain = newAnswerRte.element.textContent.trim();
+            if (!qPlain || !aPlain) {
                 Modal.show({ type: 'warning', title: t('modalWarning'), message: t('fillQuestionAnswer'), showCancel: false, confirmLabel: t('modalOk') });
                 return;
             }
             const cards = HubData.getFlashcards();
-            cards.push({ id: 'c_' + Date.now(), question: q, answer: a, nextReview: HubData.getToday(), intervalIndex: 0 });
+            cards.push({ id: 'c_' + Date.now(), question: q || qPlain, answer: a || aPlain, nextReview: HubData.getToday(), intervalIndex: 0 });
             HubData.setFlashcards(cards);
-            document.getElementById('newQuestion').value = '';
-            document.getElementById('newAnswer').value = '';
+            newQuestionRte.clear();
+            newAnswerRte.clear();
             loadCards();
         });
 

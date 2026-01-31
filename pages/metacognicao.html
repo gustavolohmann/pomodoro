@@ -30,19 +30,19 @@
 
             <div class="setting-group">
                 <label>O que aprendi hoje?</label>
-                <textarea id="learned" rows="2" class="task-text" style="width: 100%; padding: 12px;"></textarea>
+                <div id="learnedRte"></div>
             </div>
             <div class="setting-group">
                 <label>O que foi difícil?</label>
-                <textarea id="difficult" rows="2" class="task-text" style="width: 100%; padding: 12px;"></textarea>
+                <div id="difficultRte"></div>
             </div>
             <div class="setting-group">
                 <label>O que preciso revisar?</label>
-                <textarea id="toReview" rows="2" class="task-text" style="width: 100%; padding: 12px;"></textarea>
+                <div id="toReviewRte"></div>
             </div>
             <div class="setting-group">
                 <label>O que funcionou bem no estudo?</label>
-                <textarea id="worked" rows="2" class="task-text" style="width: 100%; padding: 12px;"></textarea>
+                <div id="workedRte"></div>
             </div>
             <button type="button" class="btn btn-primary" id="saveMetaBtn">Salvar reflexão</button>
 
@@ -57,18 +57,24 @@
     <script src="../js/pomodoro.js"></script>
     <script src="../js/pomodoro-header.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/rich-text-editor.js"></script>
     <script src="../js/modal.js"></script>
     <script>
         function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         const today = HubData.getToday();
 
+        var learnedRte = RichTextEditor.create(document.getElementById('learnedRte'), { placeholder: '', minHeight: 80 });
+        var difficultRte = RichTextEditor.create(document.getElementById('difficultRte'), { placeholder: '', minHeight: 80 });
+        var toReviewRte = RichTextEditor.create(document.getElementById('toReviewRte'), { placeholder: '', minHeight: 80 });
+        var workedRte = RichTextEditor.create(document.getElementById('workedRte'), { placeholder: '', minHeight: 80 });
+
         function loadToday() {
             const data = HubData.getMetacognicao(today);
             if (data) {
-                document.getElementById('learned').value = data.learned || '';
-                document.getElementById('difficult').value = data.difficult || '';
-                document.getElementById('toReview').value = data.toReview || '';
-                document.getElementById('worked').value = data.worked || '';
+                learnedRte.setHTML(data.learned || '');
+                difficultRte.setHTML(data.difficult || '');
+                toReviewRte.setHTML(data.toReview || '');
+                workedRte.setHTML(data.worked || '');
             }
         }
 
@@ -85,25 +91,19 @@
                 const data = all[d];
                 return '<div style="padding: 16px; background: var(--secondary-color); border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 12px;">' +
                     '<div style="font-weight: 600; margin-bottom: 8px;">' + d + '</div>' +
-                    '<div style="font-size: 14px; color: var(--text-secondary);"><strong>Aprendi:</strong> ' + escapeHtml(data.learned || '-') + '</div>' +
-                    '<div style="font-size: 14px; color: var(--text-secondary);"><strong>Difícil:</strong> ' + escapeHtml(data.difficult || '-') + '</div>' +
-                    '<div style="font-size: 14px; color: var(--text-secondary);"><strong>Revisar:</strong> ' + escapeHtml(data.toReview || '-') + '</div>' +
-                    '<div style="font-size: 14px; color: var(--text-secondary);"><strong>Funcionou:</strong> ' + escapeHtml(data.worked || '-') + '</div></div>';
+                    '<div class="rte-content-display" style="font-size: 14px; color: var(--text-secondary);"><strong>Aprendi:</strong> ' + (data.learned || '-') + '</div>' +
+                    '<div class="rte-content-display" style="font-size: 14px; color: var(--text-secondary);"><strong>Difícil:</strong> ' + (data.difficult || '-') + '</div>' +
+                    '<div class="rte-content-display" style="font-size: 14px; color: var(--text-secondary);"><strong>Revisar:</strong> ' + (data.toReview || '-') + '</div>' +
+                    '<div class="rte-content-display" style="font-size: 14px; color: var(--text-secondary);"><strong>Funcionou:</strong> ' + (data.worked || '-') + '</div></div>';
             }).join('');
-        }
-
-        function escapeHtml(s) {
-            const div = document.createElement('div');
-            div.textContent = s || '';
-            return div.innerHTML;
         }
 
         document.getElementById('saveMetaBtn').addEventListener('click', function() {
             const data = {
-                learned: document.getElementById('learned').value.trim(),
-                difficult: document.getElementById('difficult').value.trim(),
-                toReview: document.getElementById('toReview').value.trim(),
-                worked: document.getElementById('worked').value.trim()
+                learned: learnedRte.getHTML(),
+                difficult: difficultRte.getHTML(),
+                toReview: toReviewRte.getHTML(),
+                worked: workedRte.getHTML()
             };
             HubData.setMetacognicao(today, data);
             HubData.addActiveDay();

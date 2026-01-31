@@ -80,8 +80,10 @@
         function showCurrentCard() {
             const card = dueCards[currentIndex];
             showingAnswer = false;
-            document.getElementById('cardSide').textContent = card.question;
-            document.getElementById('cardAnswer').textContent = card.answer;
+            var qEl = document.getElementById('cardSide');
+            var aEl = document.getElementById('cardAnswer');
+            if (card.question && card.question.indexOf('<') !== -1) qEl.innerHTML = card.question; else qEl.textContent = card.question || '';
+            if (card.answer && card.answer.indexOf('<') !== -1) aEl.innerHTML = card.answer; else aEl.textContent = card.answer || '';
             document.getElementById('answerBlock').style.display = 'none';
             document.getElementById('btnReveal').style.display = 'block';
         }

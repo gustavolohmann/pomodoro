@@ -34,11 +34,11 @@
             </div>
             <div class="setting-group">
                 <label>Escreva tudo que lembra (sem consulta)</label>
-                <textarea id="blurtContent" rows="6" placeholder="Escreva aqui..." class="task-text" style="width: 100%; resize: vertical; padding: 12px;"></textarea>
+                <div id="blurtContentRte"></div>
             </div>
             <div class="setting-group">
                 <label>Conteúdo base (para comparar – opcional)</label>
-                <textarea id="blurtBase" rows="4" placeholder="Cole o conteúdo de referência para comparar" class="task-text" style="width: 100%; resize: vertical; padding: 12px;"></textarea>
+                <div id="blurtBaseRte"></div>
             </div>
             <button type="button" class="btn btn-primary" id="saveBlurtBtn">Salvar Blurt</button>
 
@@ -53,8 +53,12 @@
     <script src="../js/pomodoro.js"></script>
     <script src="../js/pomodoro-header.js"></script>
     <script src="../js/hub-data.js"></script>
+    <script src="../js/rich-text-editor.js"></script>
     <script src="../js/modal.js"></script>
     <script>
+        var blurtContentRte = RichTextEditor.create(document.getElementById('blurtContentRte'), { placeholder: 'Escreva aqui...', minHeight: 160 });
+        var blurtBaseRte = RichTextEditor.create(document.getElementById('blurtBaseRte'), { placeholder: 'Cole o conteúdo de referência para comparar', minHeight: 100 });
+
         function loadBlurts() {
             const items = HubData.getBlurts().slice(-20).reverse();
             const el = document.getElementById('blurtList');
@@ -65,24 +69,26 @@
             el.innerHTML = items.map(b => `
                 <div style="padding: 16px; background: var(--secondary-color); border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 12px;">
                     <div style="font-weight: 600; margin-bottom: 8px;">${escapeHtml(b.topic)} — ${b.date}</div>
-                    <div style="color: var(--text-secondary); font-size: 14px; white-space: pre-wrap;">${escapeHtml(b.content)}</div>
+                    <div class="rte-content-display" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${b.content || ''}</div>
                     <a href="flashcards.html" style="display: inline-block; margin-top: 8px; color: var(--primary-color);">Criar flashcards a partir deste tema →</a>
                 </div>
             `).join('');
         }
 
         function escapeHtml(s) {
+            if (!s) return '';
             const div = document.createElement('div');
-            div.textContent = s || '';
+            div.textContent = s;
             return div.innerHTML;
         }
 
         function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         document.getElementById('saveBlurtBtn').addEventListener('click', function() {
             const topic = document.getElementById('blurtTopic').value.trim();
-            const content = document.getElementById('blurtContent').value.trim();
-            const base = document.getElementById('blurtBase').value.trim();
-            if (!topic || !content) {
+            const content = blurtContentRte.getHTML();
+            const base = blurtBaseRte.getHTML();
+            const contentPlain = blurtContentRte.element.textContent.trim();
+            if (!topic || !contentPlain) {
                 Modal.show({ type: 'warning', title: t('modalWarning'), message: t('fillTopicAndContent'), showCancel: false, confirmLabel: t('modalOk') });
                 return;
             }
@@ -91,8 +97,8 @@
             HubData.setBlurts(items);
             HubData.addActiveDay();
             document.getElementById('blurtTopic').value = '';
-            document.getElementById('blurtContent').value = '';
-            document.getElementById('blurtBase').value = '';
+            blurtContentRte.clear();
+            blurtBaseRte.clear();
             loadBlurts();
         });
 
