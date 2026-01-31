@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metacognição - Hub de Estudo</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="method-page has-top-bar">
+    <div class="background-gradient"></div>
+    <header class="top-bar">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html" data-i18n="hub">Hub</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-current" data-i18n="metacognicao">Metacognição</span>
+        </nav>
+        <span id="langSelector"></span>
+    </header>
+    <div class="container">
+        <a href="index.html" class="back-link" data-i18n="backToHub">← Voltar ao Hub</a>
+        <div class="glass-card">
+            <header class="header">
+                <h1 class="app-title">🪞 Metacognição</h1>
+            </header>
+            <p class="hub-intro">Aprender a aprender. Reflexão diária: o que aprendi, o que foi difícil, o que revisar e o que funcionou bem.</p>
+
+            <div class="setting-group">
+                <label>O que aprendi hoje?</label>
+                <textarea id="learned" rows="2" class="task-text" style="width: 100%; padding: 12px;"></textarea>
+            </div>
+            <div class="setting-group">
+                <label>O que foi difícil?</label>
+                <textarea id="difficult" rows="2" class="task-text" style="width: 100%; padding: 12px;"></textarea>
+            </div>
+            <div class="setting-group">
+                <label>O que preciso revisar?</label>
+                <textarea id="toReview" rows="2" class="task-text" style="width: 100%; padding: 12px;"></textarea>
+            </div>
+            <div class="setting-group">
+                <label>O que funcionou bem no estudo?</label>
+                <textarea id="worked" rows="2" class="task-text" style="width: 100%; padding: 12px;"></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" id="saveMetaBtn">Salvar reflexão</button>
+
+            <h2 class="hub-section-title" style="margin-top: 24px;">Reflexões anteriores</h2>
+            <div id="metaList"></div>
+        </div>
+    </div>
+    <script src="../lang/pt-BR.js"></script>
+    <script src="../lang/en.js"></script>
+    <script src="../lang/es.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/hub-data.js"></script>
+    <script>
+        const today = HubData.getToday();
+
+        function loadToday() {
+            const data = HubData.getMetacognicao(today);
+            if (data) {
+                document.getElementById('learned').value = data.learned || '';
+                document.getElementById('difficult').value = data.difficult || '';
+                document.getElementById('toReview').value = data.toReview || '';
+                document.getElementById('worked').value = data.worked || '';
+            }
+        }
+
+        function loadList() {
+            const raw = localStorage.getItem(HubData.keys.metacognicao);
+            const all = raw ? JSON.parse(raw) : {};
+            const dates = Object.keys(all).sort().reverse().slice(0, 14);
+            const el = document.getElementById('metaList');
+            if (dates.length === 0) {
+                el.innerHTML = '<p style="color: var(--text-secondary);">Nenhuma reflexão salva.</p>';
+                return;
+            }
+            el.innerHTML = dates.map(d => {
+                const data = all[d];
+                return '<div style="padding: 16px; background: var(--secondary-color); border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 12px;">' +
+                    '<div style="font-weight: 600; margin-bottom: 8px;">' + d + '</div>' +
+                    '<div style="font-size: 14px; color: var(--text-secondary);"><strong>Aprendi:</strong> ' + escapeHtml(data.learned || '-') + '</div>' +
+                    '<div style="font-size: 14px; color: var(--text-secondary);"><strong>Difícil:</strong> ' + escapeHtml(data.difficult || '-') + '</div>' +
+                    '<div style="font-size: 14px; color: var(--text-secondary);"><strong>Revisar:</strong> ' + escapeHtml(data.toReview || '-') + '</div>' +
+                    '<div style="font-size: 14px; color: var(--text-secondary);"><strong>Funcionou:</strong> ' + escapeHtml(data.worked || '-') + '</div></div>';
+            }).join('');
+        }
+
+        function escapeHtml(s) {
+            const div = document.createElement('div');
+            div.textContent = s || '';
+            return div.innerHTML;
+        }
+
+        document.getElementById('saveMetaBtn').addEventListener('click', function() {
+            const data = {
+                learned: document.getElementById('learned').value.trim(),
+                difficult: document.getElementById('difficult').value.trim(),
+                toReview: document.getElementById('toReview').value.trim(),
+                worked: document.getElementById('worked').value.trim()
+            };
+            HubData.setMetacognicao(today, data);
+            HubData.addActiveDay();
+            loadList();
+            alert('Reflexão salva!');
+        });
+
+        loadToday();
+        loadList();
+    </script>
+</body>
+</html>

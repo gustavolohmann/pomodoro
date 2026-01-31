@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Recall - Hub de Estudo</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="method-page has-top-bar">
+    <div class="background-gradient"></div>
+    <header class="top-bar">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html" data-i18n="hub">Hub</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-current" data-i18n="activeRecall">Active Recall</span>
+        </nav>
+        <span id="langSelector"></span>
+    </header>
+    <div class="container">
+        <a href="index.html" class="back-link" data-i18n="backToHub">← Voltar ao Hub</a>
+        <div class="glass-card">
+            <header class="header">
+                <h1 class="app-title">🧠 <span data-i18n="activeRecall">Active Recall</span></h1>
+            </header>
+            <p class="hub-intro">Forçar o cérebro a recuperar a informação. Escolha um card, tente responder sem consultar, depois revele e marque desempenho. Impacta o Spaced Repetition.</p>
+
+            <div id="pickArea">
+                <p style="color: var(--text-secondary); margin-bottom: 12px;">Usa seus flashcards. Um card aleatório será sorteado.</p>
+                <button type="button" class="btn btn-primary" id="pickCardBtn">Sortear card</button>
+            </div>
+            <div id="recallArea" style="display: none;">
+                <div class="glass-card" style="padding: 24px; margin: 16px 0;">
+                    <div class="hub-section-title">Pergunta</div>
+                    <div id="recallQuestion" style="font-size: 18px; margin: 12px 0;"></div>
+                </div>
+                <div class="setting-group">
+                    <label>Sua resposta (opcional)</label>
+                    <textarea id="myAnswer" rows="3" placeholder="Escreva ou pense a resposta..." class="task-text" style="width: 100%; resize: vertical; padding: 12px;"></textarea>
+                </div>
+                <button type="button" class="btn btn-secondary" id="revealBtn">Revelar resposta correta</button>
+                <div id="correctBlock" style="display: none; margin-top: 16px;">
+                    <div class="hub-section-title">Resposta correta</div>
+                    <div id="correctAnswer" style="padding: 12px; background: var(--secondary-color); border-radius: 12px; margin: 8px 0;"></div>
+                    <div class="controls" style="grid-template-columns: 1fr 1fr;">
+                        <button type="button" class="btn btn-primary" id="btnAcertou">Acertei</button>
+                        <button type="button" class="btn btn-secondary" id="btnErrei">Errei</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../lang/pt-BR.js"></script>
+    <script src="../lang/en.js"></script>
+    <script src="../lang/es.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/hub-data.js"></script>
+    <script>
+        let currentCard = null;
+
+        document.getElementById('pickCardBtn').addEventListener('click', function() {
+            const cards = HubData.getFlashcards();
+            if (cards.length === 0) { alert('Crie flashcards primeiro.'); return; }
+            currentCard = cards[Math.floor(Math.random() * cards.length)];
+            document.getElementById('recallQuestion').textContent = currentCard.question;
+            document.getElementById('myAnswer').value = '';
+            document.getElementById('correctBlock').style.display = 'none';
+            document.getElementById('recallArea').style.display = 'block';
+            document.getElementById('pickArea').style.display = 'none';
+        });
+
+        document.getElementById('revealBtn').addEventListener('click', function() {
+            if (!currentCard) return;
+            document.getElementById('correctAnswer').textContent = currentCard.answer;
+            document.getElementById('correctBlock').style.display = 'block';
+        });
+
+        function finishRecall(correct) {
+            if (currentCard) {
+                const cards = HubData.getFlashcards();
+                const c = cards.find(x => x.id === currentCard.id);
+                if (c) {
+                    const INTERVALS = [1, 3, 7, 15, 30];
+                    const today = HubData.getToday();
+                    const idx = c.intervalIndex !== undefined ? c.intervalIndex : 0;
+                    c.intervalIndex = correct ? Math.min(idx + 1, INTERVALS.length - 1) : 0;
+                    const days = INTERVALS[c.intervalIndex];
+                    const d = new Date(today);
+                    d.setDate(d.getDate() + days);
+                    c.nextReview = d.toISOString().slice(0, 10);
+                    HubData.setFlashcards(cards);
+                }
+                HubData.recordActivity('cardsReviewed');
+                if (correct) HubData.recordActivity('correct');
+            }
+            document.getElementById('recallArea').style.display = 'none';
+            document.getElementById('pickArea').style.display = 'block';
+            currentCard = null;
+        }
+
+        document.getElementById('btnAcertou').addEventListener('click', () => finishRecall(true));
+        document.getElementById('btnErrei').addEventListener('click', () => finishRecall(false));
+    </script>
+</body>
+</html>

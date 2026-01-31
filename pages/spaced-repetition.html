@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spaced Repetition - Hub de Estudo</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="method-page has-top-bar">
+    <div class="background-gradient"></div>
+    <header class="top-bar">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html" data-i18n="hub">Hub</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-current" data-i18n="spacedRepetition">Spaced Repetition</span>
+        </nav>
+        <span id="langSelector"></span>
+    </header>
+    <div class="container">
+        <a href="index.html" class="back-link" data-i18n="backToHub">← Voltar ao Hub</a>
+        <div class="glass-card">
+            <header class="header">
+                <h1 class="app-title">🔁 <span data-i18n="spacedRepetition">Spaced Repetition</span></h1>
+            </header>
+            <p class="hub-intro">Revisar cards agendados do dia. Responda mentalmente antes de virar. Intervalos: 1 → 3 → 7 → 15 → 30 dias.</p>
+
+            <div id="reviewArea">
+                <p id="noDue" style="color: var(--text-secondary); display: none;">Nenhum card para revisar hoje. Crie flashcards e use "Revisar" para agendar.</p>
+                <div id="cardReview" style="display: none;">
+                    <div class="glass-card" style="padding: 24px; margin: 16px 0; min-height: 120px;">
+                        <div id="cardSide" style="font-size: 18px; color: var(--text-primary);"></div>
+                    </div>
+                    <div id="answerBlock" style="display: none;">
+                        <p class="hub-section-title">Resposta:</p>
+                        <div id="cardAnswer" style="padding: 12px; background: var(--secondary-color); border-radius: 12px; margin-bottom: 12px;"></div>
+                        <div class="controls" style="grid-template-columns: 1fr 1fr;">
+                            <button type="button" class="btn btn-primary" id="btnCorrect">Acertei</button>
+                            <button type="button" class="btn btn-secondary" id="btnWrong">Errei</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="btnReveal" style="margin-top: 8px;">Revelar resposta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../lang/pt-BR.js"></script>
+    <script src="../lang/en.js"></script>
+    <script src="../lang/es.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/hub-data.js"></script>
+    <script>
+        const INTERVALS = [1, 3, 7, 15, 30];
+        const today = HubData.getToday();
+
+        function getDueCards() {
+            const cards = HubData.getFlashcards();
+            return cards.filter(c => !c.nextReview || c.nextReview <= today);
+        }
+
+        let currentIndex = 0;
+        let dueCards = [];
+        let showingAnswer = false;
+
+        function startReview() {
+            dueCards = getDueCards();
+            currentIndex = 0;
+            showingAnswer = false;
+            document.getElementById('noDue').style.display = dueCards.length === 0 ? 'block' : 'none';
+            document.getElementById('cardReview').style.display = dueCards.length === 0 ? 'none' : 'block';
+            if (dueCards.length > 0) showCurrentCard();
+        }
+
+        function showCurrentCard() {
+            const card = dueCards[currentIndex];
+            showingAnswer = false;
+            document.getElementById('cardSide').textContent = card.question;
+            document.getElementById('cardAnswer').textContent = card.answer;
+            document.getElementById('answerBlock').style.display = 'none';
+            document.getElementById('btnReveal').style.display = 'block';
+        }
+
+        document.getElementById('btnReveal').addEventListener('click', function() {
+            showingAnswer = true;
+            document.getElementById('answerBlock').style.display = 'block';
+            document.getElementById('btnReveal').style.display = 'none';
+        });
+
+        function nextReview(intervalIndex) {
+            const days = INTERVALS[Math.min(intervalIndex, INTERVALS.length - 1)];
+            const d = new Date(today);
+            d.setDate(d.getDate() + days);
+            return d.toISOString().slice(0, 10);
+        }
+
+        function recordAnswer(correct) {
+            const card = dueCards[currentIndex];
+            const cards = HubData.getFlashcards();
+            const c = cards.find(x => x.id === card.id);
+            if (c) {
+                const idx = c.intervalIndex !== undefined ? c.intervalIndex : 0;
+                c.intervalIndex = correct ? Math.min(idx + 1, INTERVALS.length - 1) : 0;
+                c.nextReview = nextReview(c.intervalIndex);
+                HubData.setFlashcards(cards);
+            }
+            HubData.recordActivity('cardsReviewed');
+            if (correct) HubData.recordActivity('correct');
+            currentIndex++;
+            if (currentIndex >= dueCards.length) {
+                document.getElementById('noDue').textContent = 'Revisão do dia concluída!';
+                document.getElementById('noDue').style.display = 'block';
+                document.getElementById('cardReview').style.display = 'none';
+                return;
+            }
+            showCurrentCard();
+        }
+
+        document.getElementById('btnCorrect').addEventListener('click', () => recordAnswer(true));
+        document.getElementById('btnWrong').addEventListener('click', () => recordAnswer(false));
+
+        startReview();
+    </script>
+</body>
+</html>

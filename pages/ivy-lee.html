@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Diário (Ivy Lee) - Hub de Estudo</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="method-page has-top-bar">
+    <div class="background-gradient"></div>
+    <header class="top-bar">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html" data-i18n="hub">Hub</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-current" data-i18n="ivyLee">Checklist Diário (Ivy Lee)</span>
+        </nav>
+        <span id="langSelector"></span>
+    </header>
+    <div class="container">
+        <a href="index.html" class="back-link" data-i18n="backToHub">← Voltar ao Hub</a>
+        <div class="glass-card">
+            <header class="header">
+                <h1 class="app-title">✅ <span data-i18n="ivyLee">Checklist Diário (Ivy Lee)</span></h1>
+            </header>
+            <p class="hub-intro" data-i18n="ivyLeeDesc">Clareza e prioridade diária. Crie até 6 tarefas para hoje, ordene por prioridade e execute uma a uma. Tarefas não concluídas não são migradas automaticamente.</p>
+            <p class="hub-section-title" id="todayLabel"></p>
+
+            <div class="ivy-add-form" id="addTaskForm">
+                <div class="setting-group">
+                    <label data-i18n="taskName">Nome da tarefa</label>
+                    <input type="text" id="newTaskName" class="task-text" data-i18n-placeholder="taskNamePlaceholder" placeholder="Ex: Revisar capítulo 5" maxlength="200">
+                </div>
+                <div class="setting-group">
+                    <label data-i18n="taskDescription">Descrição (opcional)</label>
+                    <textarea id="newTaskDesc" class="task-text ivy-desc-input" data-i18n-placeholder="taskDescriptionPlaceholder" placeholder="Detalhes ou subtarefas..." rows="2"></textarea>
+                </div>
+                <button type="button" class="btn btn-primary" id="addTaskBtn" data-i18n="addTask">+ Adicionar tarefa</button>
+            </div>
+
+            <ul class="task-list" id="taskList"></ul>
+        </div>
+    </div>
+    <script src="../lang/pt-BR.js"></script>
+    <script src="../lang/en.js"></script>
+    <script src="../lang/es.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/hub-data.js"></script>
+    <script>
+        const MAX_TASKS = 6;
+        const today = HubData.getToday();
+        document.getElementById('todayLabel').textContent = (window.I18n ? window.I18n.t('today') : 'Hoje') + ': ' + today;
+
+        function escapeAttr(s) {
+            if (s == null) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function loadTasks() {
+            const tasks = HubData.getIvyLee(today);
+            const ul = document.getElementById('taskList');
+            ul.innerHTML = '';
+            const tName = window.I18n ? window.I18n.t('taskNamePlaceholder') : 'Nome da tarefa';
+            const tRemove = window.I18n ? window.I18n.t('remove') : 'Remover';
+            tasks.forEach((t, i) => {
+                const name = t.name != null ? t.name : (t.text || '');
+                const desc = t.description != null ? t.description : '';
+                const li = document.createElement('li');
+                if (t.done) li.classList.add('done');
+                li.innerHTML = '<input type="checkbox" class="task-check" data-id="' + t.id + '" ' + (t.done ? 'checked' : '') + '>' +
+                    '<div class="task-body">' +
+                    '<input type="text" class="task-name" value="' + escapeAttr(name) + '" placeholder="' + escapeAttr(tName) + '" data-id="' + t.id + '">' +
+                    '<textarea class="task-desc" placeholder="' + escapeAttr(window.I18n ? window.I18n.t('taskDescriptionPlaceholder') : 'Descrição (opcional)') + '" data-id="' + t.id + '" rows="1">' + escapeAttr(desc) + '</textarea>' +
+                    '</div>' +
+                    '<button type="button" class="btn btn-secondary task-remove" style="padding: 6px 12px; font-size: 14px;" data-id="' + t.id + '" aria-label="' + escapeAttr(tRemove) + '">' + escapeAttr(tRemove) + '</button>';
+                ul.appendChild(li);
+            });
+            bindTaskEvents();
+        }
+
+        function bindTaskEvents() {
+            document.querySelectorAll('.task-check').forEach(el => {
+                el.onclick = function() {
+                    const id = this.dataset.id;
+                    const tasks = HubData.getIvyLee(today);
+                    const t = tasks.find(x => x.id === id);
+                    if (t) { t.done = this.checked; HubData.setIvyLee(today, tasks); HubData.addActiveDay(); }
+                    this.closest('li').classList.toggle('done', this.checked);
+                };
+            });
+            document.querySelectorAll('.task-name').forEach(el => {
+                el.onblur = function() {
+                    const id = this.dataset.id;
+                    const tasks = HubData.getIvyLee(today);
+                    const t = tasks.find(x => x.id === id);
+                    if (t) { t.name = this.value.trim(); if (t.text !== undefined) delete t.text; HubData.setIvyLee(today, tasks); HubData.addActiveDay(); }
+                };
+            });
+            document.querySelectorAll('.task-desc').forEach(el => {
+                el.onblur = function() {
+                    const id = this.dataset.id;
+                    const tasks = HubData.getIvyLee(today);
+                    const t = tasks.find(x => x.id === id);
+                    if (t) { t.description = this.value.trim(); HubData.setIvyLee(today, tasks); HubData.addActiveDay(); }
+                };
+            });
+            document.querySelectorAll('.task-remove').forEach(el => {
+                el.onclick = function() {
+                    const id = this.dataset.id;
+                    let tasks = HubData.getIvyLee(today).filter(x => x.id !== id);
+                    HubData.setIvyLee(today, tasks);
+                    loadTasks();
+                };
+            });
+        }
+
+        document.getElementById('addTaskBtn').addEventListener('click', function() {
+            const nameEl = document.getElementById('newTaskName');
+            const descEl = document.getElementById('newTaskDesc');
+            const name = nameEl.value.trim();
+            if (!name) { alert(window.I18n ? window.I18n.t('taskNameRequired') : 'Digite o nome da tarefa.'); nameEl.focus(); return; }
+            const tasks = HubData.getIvyLee(today);
+            if (tasks.length >= MAX_TASKS) { alert(window.I18n ? window.I18n.t('maxTasks') : 'Máximo de 6 tarefas.'); return; }
+            tasks.push({ id: 'id_' + Date.now(), name: name, description: descEl.value.trim() || '', done: false, order: tasks.length });
+            HubData.setIvyLee(today, tasks);
+            HubData.addActiveDay();
+            nameEl.value = '';
+            descEl.value = '';
+            nameEl.focus();
+            loadTasks();
+        });
+
+        loadTasks();
+    </script>
+</body>
+</html>

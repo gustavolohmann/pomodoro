@@ -232,9 +232,9 @@ function updateDisplay() {
     
     // Atualizar texto do modo
     const modeNames = {
-        pomodoro: 'Pomodoro',
-        shortBreak: 'Pausa Curta',
-        longBreak: 'Pausa Longa'
+        pomodoro: (window.I18n && window.I18n.t('pomodoroMode')) || 'Pomodoro',
+        shortBreak: (window.I18n && window.I18n.t('shortBreak')) || 'Pausa Curta',
+        longBreak: (window.I18n && window.I18n.t('longBreak')) || 'Pausa Longa'
     };
     elements.currentMode.textContent = modeNames[state.currentMode];
 }
@@ -447,9 +447,9 @@ function playNotificationSound() {
 
 function showNotification() {
     const modeNames = {
-        pomodoro: 'Pomodoro',
-        shortBreak: 'Pausa Curta',
-        longBreak: 'Pausa Longa'
+        pomodoro: (window.I18n && window.I18n.t('pomodoroMode')) || 'Pomodoro',
+        shortBreak: (window.I18n && window.I18n.t('shortBreak')) || 'Pausa Curta',
+        longBreak: (window.I18n && window.I18n.t('longBreak')) || 'Pausa Longa'
     };
     
     const message = state.currentMode === 'pomodoro' 

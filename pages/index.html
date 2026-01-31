@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub de Métodos de Estudo</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9324344798301944" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="background-gradient"></div>
+
+    <div class="hub-page">
+        <div class="hub-inner">
+            <!-- Header -->
+            <header class="hub-header fade-in">
+                <nav class="hub-breadcrumb">
+                    <a href="index.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                        <span data-i18n="hub">Hub</span>
+                    </a>
+                </nav>
+                <div class="hub-title-wrap">
+                    <h1 id="main-title" class="hub-main-title" data-i18n="hubTitle">Hub de Métodos de Estudo</h1>
+                    <p id="subtitle" class="hub-subtitle" data-i18n="hubSubtitle">Escolha seu método e comece a estudar com foco</p>
+                </div>
+                <div class="hub-header-actions">
+                    <span id="langSelector"></span>
+                    <a href="dashboard.html" class="icon-btn" aria-label="Dashboard" title="Ver progresso">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Stats Bar -->
+            <div class="hub-stats-bar glass-card fade-in stagger-1">
+                <div class="hub-stat-item">
+                    <div class="hub-stat-icon streak">🔥</div>
+                    <div>
+                        <p class="hub-stat-label" data-i18n="streakLabel">Streak</p>
+                        <p class="hub-stat-value streak" id="statStreak">0</p>
+                        <span class="hub-stat-label" data-i18n="days">dias</span>
+                    </div>
+                </div>
+                <div class="hub-stat-item">
+                    <div class="hub-stat-icon today">⏱️</div>
+                    <div>
+                        <p class="hub-stat-label" data-i18n="todayLabel">Hoje</p>
+                        <p class="hub-stat-value today" id="statToday">0 min</p>
+                    </div>
+                </div>
+                <div class="hub-stat-item">
+                    <div class="hub-stat-icon cards">📚</div>
+                    <div>
+                        <p class="hub-stat-label" data-i18n="cardsReviewedLabel">Cards revisados</p>
+                        <p class="hub-stat-value cards" id="statCards">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methods Grid -->
+            <main class="hub-methods-grid" id="hubGrid">
+                <a href="pomodoro.html" class="method-card fade-in stagger-2">
+                    <div class="icon-container green">🍅</div>
+                    <h3 data-i18n="pomodoro">Pomodoro</h3>
+                    <p class="method-desc" data-i18n="pomodoroDesc">Foco e pausas</p>
+                    <div class="method-status">
+                        <span class="dot pulse" style="background: var(--accent-green);"></span>
+                        <span data-i18n="statusReady">Pronto para usar</span>
+                    </div>
+                </a>
+                <a href="active-recall.html" class="method-card fade-in stagger-3">
+                    <div class="icon-container blue">🧠</div>
+                    <h3 data-i18n="activeRecall">Active Recall</h3>
+                    <p class="method-desc" data-i18n="activeRecallDesc">Recuperar informação</p>
+                    <div class="method-status">
+                        <span class="dot pulse" style="background: var(--accent-blue);"></span>
+                        <span id="statusActiveRecall">0 <span data-i18n="statusCardsPending">para revisar</span></span>
+                    </div>
+                </a>
+                <a href="flashcards.html" class="method-card fade-in stagger-4">
+                    <div class="icon-container purple">🃏</div>
+                    <h3 data-i18n="flashcards">Flashcards</h3>
+                    <p class="method-desc" data-i18n="flashcardsDesc">Pergunta e resposta</p>
+                    <div class="method-status">
+                        <span class="dot pulse" style="background: var(--accent-purple);"></span>
+                        <span id="statusFlashcards">0 <span data-i18n="statusCardsPending">para revisar</span></span>
+                    </div>
+                </a>
+                <a href="blurt.html" class="method-card fade-in stagger-5">
+                    <div class="icon-container yellow">✍️</div>
+                    <h3 data-i18n="blurt">Blurt Method</h3>
+                    <p class="method-desc" data-i18n="blurtDesc">Escrever o que lembra</p>
+                    <div class="method-status">
+                        <span class="dot" style="background: var(--text-secondary);"></span>
+                        <span data-i18n="statusNoSession">Sem sessão ativa</span>
+                    </div>
+                </a>
+                <a href="ivy-lee.html" class="method-card fade-in stagger-6">
+                    <div class="icon-container green">📋</div>
+                    <h3 data-i18n="ivyLee">Checklist Diário (Ivy Lee)</h3>
+                    <p class="method-desc" data-i18n="ivyLeeDesc">Até 6 tarefas prioritárias</p>
+                    <div class="method-status">
+                        <span class="dot pulse" style="background: var(--accent-green);"></span>
+                        <span id="statusIvyLee">0/6 <span data-i18n="statusIvyComplete">completas</span></span>
+                    </div>
+                </a>
+                <a href="metacognicao.html" class="method-card fade-in stagger-7">
+                    <div class="icon-container purple">🪞</div>
+                    <h3 data-i18n="metacognicao">Metacognição</h3>
+                    <p class="method-desc" data-i18n="metacognicaoDesc">Reflexão diária</p>
+                    <div class="method-status">
+                        <span class="dot" style="background: var(--text-secondary);"></span>
+                        <span data-i18n="statusNoSession">Sem sessão ativa</span>
+                    </div>
+                </a>
+                <a href="spaced-repetition.html" class="method-card fade-in stagger-8">
+                    <div class="icon-container blue">🔁</div>
+                    <h3 data-i18n="spacedRepetition">Spaced Repetition</h3>
+                    <p class="method-desc" data-i18n="spacedRepetitionDesc">Revisão espaçada</p>
+                    <div class="method-status">
+                        <span class="dot pulse" style="background: var(--accent-blue);"></span>
+                        <span id="statusSpaced">0 <span data-i18n="statusCardsPending">para revisar</span></span>
+                    </div>
+                </a>
+                <a href="dashboard.html" class="method-card fade-in stagger-8">
+                    <div class="icon-container purple">📊</div>
+                    <h3 data-i18n="dashboard">Dashboard</h3>
+                    <p class="method-desc" data-i18n="dashboardDesc">Progresso e estatísticas</p>
+                    <div class="method-status">
+                        <span class="dot" style="background: var(--accent-purple);"></span>
+                        <span data-i18n="statusReady">Pronto para usar</span>
+                    </div>
+                </a>
+            </main>
+
+            <!-- Backup -->
+            <div class="hub-backup fade-in">
+                <h2 class="hub-section-title">💾 <span data-i18n="backupTitle">Backup & Segurança</span></h2>
+                <div class="hub-backup-buttons">
+                    <button type="button" class="btn btn-secondary" id="exportBtn" data-i18n="exportBtn">Exportar dados (JSON)</button>
+                    <button type="button" class="btn btn-secondary" id="importBtn" data-i18n="importBtn">Importar dados</button>
+                    <button type="button" class="btn btn-secondary" id="resetBtn" data-i18n="resetBtn">Resetar sistema</button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Action -->
+    <a href="pomodoro.html" class="quick-action-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span data-i18n="quickStart">Iniciar</span>
+    </a>
+
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="../lang/pt-BR.js"></script>
+    <script src="../lang/en.js"></script>
+    <script src="../lang/es.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/hub-data.js"></script>
+    <script>
+        (function() {
+            function loadStats() {
+                if (typeof HubData === 'undefined') return;
+                var log = HubData.getActivityLog();
+                var dates = log.dates || [];
+                var today = HubData.getToday();
+                var dayOffset = 0;
+                var streak = 0;
+                var dateSet = new Set(dates);
+                while (true) {
+                    var d = new Date();
+                    d.setDate(d.getDate() - dayOffset);
+                    var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                    if (!dateSet.has(key)) break;
+                    streak++;
+                    dayOffset++;
+                }
+                var streakEl = document.getElementById('statStreak');
+                if (streakEl) streakEl.textContent = streak;
+
+                var totalMin = log.pomodoroMinutes || 0;
+                try {
+                    var ps = localStorage.getItem('pomodoroStatistics');
+                    if (ps) { var s = JSON.parse(ps); totalMin += (s.totalCount || 0) * 25; }
+                } catch (e) {}
+                var todayEl = document.getElementById('statToday');
+                if (todayEl) todayEl.textContent = totalMin + ' min';
+
+                var cardsEl = document.getElementById('statCards');
+                if (cardsEl) cardsEl.textContent = log.cardsReviewed || 0;
+
+                var due = HubData.getDueCards ? HubData.getDueCards() : [];
+                var dueCount = due.length;
+                var arEl = document.getElementById('statusActiveRecall');
+                var fcEl = document.getElementById('statusFlashcards');
+                var spEl = document.getElementById('statusSpaced');
+                if (arEl) arEl.innerHTML = dueCount + ' <span data-i18n="statusCardsPending">para revisar</span>';
+                if (fcEl) fcEl.innerHTML = dueCount + ' <span data-i18n="statusCardsPending">para revisar</span>';
+                if (spEl) spEl.innerHTML = dueCount + ' <span data-i18n="statusCardsPending">para revisar</span>';
+
+                var ivyTasks = HubData.getIvyLee(today);
+                var ivyDone = ivyTasks.filter(function(t) { return t.done; }).length;
+                var ivyEl = document.getElementById('statusIvyLee');
+                if (ivyEl) ivyEl.innerHTML = ivyDone + '/6 <span data-i18n="statusIvyComplete">completas</span>';
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', loadStats);
+            } else {
+                loadStats();
+            }
+        })();
+
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            var data = HubData.exportAll();
+            var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'hub-estudo-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast(window.I18n ? window.I18n.t('toastExport') : 'Backup exportado!');
+        });
+
+        document.getElementById('importBtn').addEventListener('click', function() {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    var data = JSON.parse(ev.target.result);
+                    HubData.importAll(data);
+                    showToast(window.I18n ? window.I18n.t('toastImport') : 'Dados importados! Recarregue a página.');
+                    setTimeout(function() { location.reload(); }, 1500);
+                } catch (err) {
+                    showToast(window.I18n ? window.I18n.t('toastImportError') : 'Erro ao importar. Verifique o arquivo.');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            if (!confirm(window.I18n ? window.I18n.t('confirmReset') : 'Tem certeza? Todos os dados do Hub serão apagados.')) return;
+            HubData.resetHub();
+            showToast(window.I18n ? window.I18n.t('toastReset') : 'Hub resetado. Recarregando...');
+            setTimeout(function() { location.reload(); }, 1000);
+        });
+
+        function showToast(msg) {
+            var el = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = msg;
+            el.classList.add('show');
+            setTimeout(function() { el.classList.remove('show'); }, 3000);
+        }
+    </script>
+</body>
+</html>
