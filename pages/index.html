@@ -153,6 +153,32 @@
                 </div>
                 <input type="file" id="importFile" accept=".json" style="display: none;">
             </div>
+
+            <!-- Apoie o projeto -->
+            <div class="hub-support fade-in" id="hubSupport">
+                <h2 class="hub-section-title">☕ <span data-i18n="supportTitle">Apoie o projeto</span></h2>
+                <p class="hub-support-text" data-i18n="supportText">Se o hub te ajudou nos estudos, você pode mandar um trocado. Não é obrigatório.</p>
+                <div class="hub-support-options" id="hubSupportOptions">
+                    <div class="hub-support-option" data-support="pix">
+                        <span class="hub-support-label" data-i18n="supportPix">No Brasil: PIX</span>
+                        <span class="hub-support-value" id="supportPixKey">gustavolohmannlinz@gmail.com</span>
+                        <button type="button" class="btn btn-secondary hub-support-copy" id="copyPixBtn" data-i18n="supportCopy">Copiar</button>
+                    </div>
+                    <div class="hub-support-option" data-support="international">
+                        <span class="hub-support-label" data-i18n="supportInternational">Fora do Brasil: cartão ou PayPal</span>
+                        <a href="https://www.paypal.com/donate/?business=UZSMU9BZ8X3KQ&no_recurring=0&item_name=Hub+de+Estudos+%C3%A9+gratuito+e+sem+login.+Se+te+ajudou%2C+um+caf%C3%A9+ajuda+a+manter+no+ar.+Obrigado%21+%E2%98%95&currency_code=BRL" id="supportCoffeeLink" class="hub-support-paypal-btn" target="_blank" rel="noopener noreferrer" aria-label="Doar via PayPal">
+                            <span class="hub-support-paypal-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M7.076 21.337H2.47a.596.596 0 0 1-.59-.693L4.944 3.72a.596.596 0 0 1 .59-.498h5.18c2.504 0 4.444.646 5.678 1.904 1.235 1.258 1.747 2.932 1.53 4.992-.436 4.075-2.865 6.092-7.246 6.092H9.12a.596.596 0 0 0-.59.498l-.72 5.492-.734 5.631z"/></svg>
+                            </span>
+                            <span data-i18n="supportPayPal">Doar via PayPal</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="hub-support-security">
+                    <span class="hub-support-security-icon" aria-hidden="true">🔒</span>
+                    <span class="hub-support-security-text"><span data-i18n="supportSecurityText">Só doe por este endereço:</span> <strong id="supportOfficialUrl">www.godtimestudy.com.br</strong></span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -283,6 +309,33 @@
             };
             reader.readAsText(file);
             e.target.value = '';
+        });
+
+        (function supportReorder() {
+            var tz = typeof Intl !== 'undefined' && Intl.DateTimeFormat ? Intl.DateTimeFormat().resolvedOptions().timeZone : '';
+            var brazilZones = ['America/Sao_Paulo', 'America/Manaus', 'America/Noronha', 'America/Belem', 'America/Fortaleza', 'America/Recife', 'America/Cuiaba', 'America/Campo_Grande', 'America/Araguaina'];
+            var isBrazil = brazilZones.indexOf(tz) !== -1;
+            var container = document.getElementById('hubSupportOptions');
+            if (!container) return;
+            var pix = container.querySelector('[data-support="pix"]');
+            var intl = container.querySelector('[data-support="international"]');
+            if (!pix || !intl) return;
+            if (!isBrazil && intl && pix) {
+                container.insertBefore(intl, pix);
+            }
+        })();
+
+        document.getElementById('copyPixBtn').addEventListener('click', function() {
+            var keyEl = document.getElementById('supportPixKey');
+            if (!keyEl) return;
+            var key = (keyEl.textContent || '').trim();
+            if (!key || key === 'COLOQUE_SUA_CHAVE_PIX_AQUI') return;
+            navigator.clipboard.writeText(key).then(function() {
+                var btn = document.getElementById('copyPixBtn');
+                var orig = btn.textContent;
+                btn.textContent = window.I18n ? window.I18n.t('supportCopied') : 'Copiado!';
+                setTimeout(function() { btn.textContent = orig; }, 2000);
+            });
         });
 
         document.getElementById('resetBtn').addEventListener('click', function() {
