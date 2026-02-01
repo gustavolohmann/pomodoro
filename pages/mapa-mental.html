@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa Mental - Hub de Estudo</title>
     <meta name="description" content="Crie mapas mentais online: nós, ligações e formas. Organize ideias visualmente no navegador, sem cadastro. Hub de Métodos de Estudo.">
+    <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://www.godtimestudy.com.br/pages/mapa-mental.html">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Mapa Mental - Hub de Estudo">
@@ -19,6 +20,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebApplication","name":"Editor de Mapa Mental - Hub de Estudo","description":"Crie mapas mentais online: nós, ligações e formas. Organize ideias visualmente no navegador, sem cadastro. Exporte em PNG e SVG.","url":"https://www.godtimestudy.com.br/pages/mapa-mental.html","applicationCategory":"EducationalApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"}}
+    </script>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Hub","item":"https://www.godtimestudy.com.br/pages/index.html"},{"@type":"ListItem","position":2,"name":"Mapa Mental","item":"https://www.godtimestudy.com.br/pages/mapa-mental.html"}]}
+    </script>
 </head>
 <body class="method-page has-top-bar mindmap-page">
     <div class="background-gradient"></div>
@@ -36,6 +43,7 @@
             <div class="mindmap-sidebar-header">
                 <a href="index.html" class="mindmap-back" data-i18n="backToHub">← Voltar ao Hub</a>
             </div>
+            <h1 class="mindmap-page-title visually-hidden">Editor de Mapa Mental Online</h1>
             <div class="mindmap-not-saved-banner" role="alert">
                 <span class="mindmap-not-saved-icon" aria-hidden="true">⚠️</span>
                 <p class="mindmap-not-saved-text" data-i18n="mindmapNotSavedWarning">Este mapa mental não é salvo automaticamente.</p>
@@ -90,8 +98,9 @@
                 </button>
             </div>
             <p class="mindmap-sidebar-hint" data-i18n="mindmapHint">Novo nó: clique no canvas. Nova ligação: clique em dois nós. Duplo clique no nó para editar. Esc cancela.</p>
+            <p class="seo-outros-links">Outros métodos de estudo: <a href="index.html">Hub</a>, <a href="pomodoro.html">Pomodoro</a>, <a href="flashcards.html">Flashcards</a>.</p>
         </aside>
-        <div class="mindmap-canvas-wrap" id="mindmapCanvasWrap">
+        <div class="mindmap-canvas-wrap" id="mindmapCanvasWrap" role="application" aria-label="Editor de mapa mental: arraste nós, crie ligações entre conceitos e edite texto. Duplo clique no nó para editar. Exporte em PNG ou SVG.">
             <svg class="mindmap-svg" id="mindmapSvg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <pattern id="mindmap-grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
