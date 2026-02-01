@@ -1,0 +1,20 @@
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores / IDE (opcional: remova as linhas abaixo se quiser versionar configurações)
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs e temporários
+*.log
+*.tmp
+.cache/
+
+# Variáveis de ambiente (se um dia usar)
+.env
+.env.local
+.env.*.local
