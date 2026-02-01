@@ -25,18 +25,26 @@
     let nextShape = 'rect';
     let selectedNodeId = null;
     let selectedEdgeIndex = -1;
-    /* Interação ativa (apenas um por vez): dragNodeId | resizingNodeId | isPanning | editingNodeId | linkSourceNodeId */
+    /**
+     * Estado mutável do editor. Apenas um tipo de interação ativa por vez:
+     * dragNodeId | resizingNodeId | isPanning | editingNodeId | linkSourceNodeId
+     */
     let dragNodeId = null;
     let dragOffsetX = 0, dragOffsetY = 0;
-    /** Nó de origem ao criar ligação (modo addEdge); clique em qualquer área do nó define origem. */
     let linkSourceNodeId = null;
     let editingNodeId = null;
+    /** Referência ao elemento .mindmap-node-edit em edição (evita querySelector). */
+    let editingNodeEl = null;
     let resizingNodeId = null;
     let resizeHandle = null;
     let resizeStart = null;
     let viewBox = { x: VIEWBOX_DEFAULT.x, y: VIEWBOX_DEFAULT.y, w: VIEWBOX_DEFAULT.w, h: VIEWBOX_DEFAULT.h };
     let isPanning = false;
     let panStart = null;
+    let renderScheduled = false;
+    let cursorUpdateScheduled = false;
+    let modeButtons = [];
+    let shapeButtons = [];
     let i18n = window.I18n || { t: function (k) { return k; } };
 
     function getNodeW(node) { return Math.max(NODE_MIN_W, node.width || NODE_WIDTH); }
@@ -52,6 +60,16 @@
 
     function applyViewBox() {
         if (svgEl) svgEl.setAttribute('viewBox', viewBox.x + ' ' + viewBox.y + ' ' + viewBox.w + ' ' + viewBox.h);
+    }
+
+    /** Agenda no máximo uma renderização por frame (drag/resize/pan). */
+    function scheduleRender() {
+        if (renderScheduled) return;
+        renderScheduled = true;
+        requestAnimationFrame(function () {
+            renderScheduled = false;
+            render();
+        });
     }
 
     function getSvgPoint(evt) {
@@ -228,6 +246,7 @@
             body.style.caretColor = 'currentColor';
             fo.appendChild(body);
             el.appendChild(fo);
+            editingNodeEl = body;
             g.appendChild(el);
             (function focusEdit() {
                 requestAnimationFrame(function () {
@@ -249,6 +268,7 @@
                 var n = getNodeById(node.id);
                 if (n) n.text = txt;
                 editingNodeId = null;
+                editingNodeEl = null;
                 save();
                 render();
             });
@@ -331,11 +351,12 @@
     function render() {
         if (!gEdges || !gNodes) return;
         if (editingNodeId) {
-            var ed = document.querySelector('.mindmap-node-edit');
+            var ed = editingNodeEl || document.querySelector('.mindmap-node-edit');
             if (ed) {
                 var n = getNodeById(editingNodeId);
                 if (n) n.text = (ed.textContent || '').trim();
             }
+            editingNodeEl = null;
         }
         gEdges.innerHTML = '';
         gNodes.innerHTML = '';
@@ -350,12 +371,13 @@
     /** Persiste texto do nó em edição e sai do modo edição (sem alterar seleção). */
     function commitEditingNode() {
         if (!editingNodeId) return;
-        var ed = document.querySelector('.mindmap-node-edit');
+        var ed = editingNodeEl || document.querySelector('.mindmap-node-edit');
         if (ed) {
             var n = getNodeById(editingNodeId);
             if (n) n.text = (ed.textContent || '').trim();
         }
         editingNodeId = null;
+        editingNodeEl = null;
     }
 
     function doRemoveNode(id) {
@@ -363,7 +385,7 @@
         edges = edges.filter(function (e) { return e.from !== id && e.to !== id; });
         if (selectedNodeId === id) selectedNodeId = null;
         selectedEdgeIndex = -1;
-        if (editingNodeId === id) editingNodeId = null;
+        if (editingNodeId === id) { editingNodeId = null; editingNodeEl = null; }
         if (dragNodeId === id) dragNodeId = null;
         if (resizingNodeId === id) {
             resizingNodeId = null;
@@ -375,6 +397,7 @@
         render();
     }
 
+    /** Remove aresta por índice. Todos os caminhos de exclusão de aresta passam por aqui. */
     function doRemoveEdge(index) {
         if (index < 0 || index >= edges.length) return;
         edges.splice(index, 1);
@@ -405,8 +428,8 @@
             canvasWrap.classList.remove('panning', 'pan-cursor', 'mindmap-mode-addEdge');
             if (mode === 'addEdge') canvasWrap.classList.add('mindmap-mode-addEdge');
         }
-        var btns = document.querySelectorAll('.mindmap-btn-mode');
-        for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-mode') === mode);
+        for (var i = 0; i < modeButtons.length; i++) modeButtons[i].classList.toggle('active', modeButtons[i].getAttribute('data-mode') === mode);
+        if (mode === 'select') updatePanCursor(false);
         render();
     }
 
@@ -425,106 +448,79 @@
         gNodes = svgEl.querySelector('.mindmap-nodes');
         if (!gEdges || !gNodes) return;
 
+        modeButtons = container.querySelectorAll('.mindmap-btn-mode') || [];
+        shapeButtons = container.querySelectorAll('.mindmap-btn-shape') || [];
+
         load();
         applyViewBox();
 
         var target = canvasWrap || container;
-        function onCanvasMousedown(evt) {
-            if (evt.target.closest && evt.target.closest('.mindmap-node-edit')) return;
+        var lastCursorShowPan = false;
 
-            if (evt.button === 2) {
-                evt.preventDefault();
-                if (mode === 'select') {
-                    isPanning = true;
-                    panStart = { clientX: evt.clientX, clientY: evt.clientY, viewBoxX: viewBox.x, viewBoxY: viewBox.y };
-                    if (canvasWrap) canvasWrap.classList.add('panning');
-                }
-                return;
-            }
-            if (evt.button !== 0) return;
-
+        function getNodeIdFromEvent(evt) {
             var pt = getSvgPoint(evt);
-            var handleEl = evt.target.closest && evt.target.closest('[data-handle]');
-            if (handleEl) {
-                var nodeEl = handleEl.closest('[data-id]');
-                var nodeId = nodeEl ? nodeEl.getAttribute('data-id') : null;
-                /* Resize só no modo seleção; em addEdge não inicia resize */
-                if (nodeId && mode === 'select') {
-                    var n = getNodeById(nodeId);
-                    if (n) {
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                        resizingNodeId = nodeId;
-                        resizeHandle = handleEl.getAttribute('data-handle');
-                        resizeStart = { x: pt.x, y: pt.y, w: getNodeW(n), h: getNodeH(n) };
-                    }
-                }
-                return;
-            }
-
-            /* Resolver nó: priorizar alvo do evento (qualquer área do nó: corpo, texto, hit) para ligação previsível */
-            var nodeId = null;
             var nodeEl = evt.target.closest && evt.target.closest('.mindmap-node[data-id]');
-            if (nodeEl) nodeId = nodeEl.getAttribute('data-id');
+            var nodeId = nodeEl ? nodeEl.getAttribute('data-id') : null;
             if (!nodeId) nodeId = hitTestNode(pt.x, pt.y);
             var edgeIdx = hitTestEdge(pt.x, pt.y);
+            return { nodeId: nodeId, pt: pt, edgeIdx: edgeIdx };
+        }
 
-            if (nodeId) {
-                evt.preventDefault();
-                evt.stopPropagation();
-                if (mode === 'delete') {
-                    doRemoveNode(nodeId);
-                    return;
-                }
-                if (mode === 'addEdge') {
-                    /* Modo Criar Ligação: clique em qualquer área do nó; drag/resize não iniciam */
-                    commitEditingNode();
-                    if (!linkSourceNodeId) {
-                        linkSourceNodeId = nodeId;
-                        selectedNodeId = nodeId;
-                        render();
-                        return;
-                    }
-                    if (linkSourceNodeId === nodeId) {
-                        linkSourceNodeId = null;
-                        selectedNodeId = null;
-                        render();
-                        return;
-                    }
-                    if (!getNodeById(linkSourceNodeId) || !getNodeById(nodeId)) {
-                        linkSourceNodeId = null;
-                        selectedNodeId = null;
-                        render();
-                        return;
-                    }
-                    edges.push({ from: linkSourceNodeId, to: nodeId });
-                    save();
-                    linkSourceNodeId = null;
-                    selectedNodeId = null;
-                    setMode('select');
-                    return;
-                }
-                if (mode === 'select' || mode === 'addNode') {
-                    if (editingNodeId === nodeId) return;
-                    if (mode === 'select' && selectedNodeId === nodeId) {
-                        linkSourceNodeId = null;
-                        editingNodeId = nodeId;
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                        render();
-                        return;
-                    }
-                    selectedNodeId = nodeId;
-                    selectedEdgeIndex = -1;
-                    /* Drag só fora do modo addEdge (addEdge já retornou acima) */
-                    dragNodeId = nodeId;
-                    var n = getNodeById(nodeId);
-                    if (n) { dragOffsetX = pt.x - n.x; dragOffsetY = pt.y - n.y; }
-                    render();
-                }
+        function handleNodeClick(evt, nodeId, pt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            if (mode === 'delete') {
+                doRemoveNode(nodeId);
                 return;
             }
+            if (mode === 'addEdge') {
+                commitEditingNode();
+                if (!linkSourceNodeId) {
+                    linkSourceNodeId = nodeId;
+                    selectedNodeId = nodeId;
+                    render();
+                    return;
+                }
+                if (linkSourceNodeId === nodeId) {
+                    linkSourceNodeId = null;
+                    selectedNodeId = null;
+                    render();
+                    return;
+                }
+                if (!getNodeById(linkSourceNodeId) || !getNodeById(nodeId)) {
+                    linkSourceNodeId = null;
+                    selectedNodeId = null;
+                    render();
+                    return;
+                }
+                edges.push({ from: linkSourceNodeId, to: nodeId });
+                save();
+                linkSourceNodeId = null;
+                selectedNodeId = null;
+                setMode('select');
+                return;
+            }
+            if (mode === 'select' || mode === 'addNode') {
+                if (editingNodeId === nodeId) return;
+                if (mode === 'select' && selectedNodeId === nodeId) {
+                    linkSourceNodeId = null;
+                    editingNodeId = nodeId;
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    render();
+                    return;
+                }
+                selectedNodeId = nodeId;
+                selectedEdgeIndex = -1;
+                dragNodeId = nodeId;
+                var n = getNodeById(nodeId);
+                if (n) { dragOffsetX = pt.x - n.x; dragOffsetY = pt.y - n.y; }
+                try { if (target.setPointerCapture && evt.pointerId != null) target.setPointerCapture(evt.pointerId); } catch (err) {}
+                render();
+            }
+        }
 
+        function handleEdgeClick(evt, edgeIdx) {
             if (edgeIdx >= 0 && mode === 'delete') {
                 evt.preventDefault();
                 evt.stopPropagation();
@@ -537,9 +533,10 @@
                 selectedEdgeIndex = edgeIdx;
                 selectedNodeId = null;
                 render();
-                return;
             }
+        }
 
+        function handleCanvasEmptyClick(evt, pt) {
             selectedNodeId = null;
             selectedEdgeIndex = -1;
             if (mode === 'addEdge') {
@@ -557,7 +554,6 @@
                 render();
                 return;
             }
-
             if (mode === 'select') {
                 evt.preventDefault();
                 render();
@@ -566,14 +562,64 @@
             }
         }
 
+        function onCanvasMousedown(evt) {
+            if (evt.target.closest && evt.target.closest('.mindmap-node-edit')) return;
+
+            if (evt.button === 2) {
+                evt.preventDefault();
+                if (mode === 'select') {
+                    isPanning = true;
+                    panStart = { clientX: evt.clientX, clientY: evt.clientY, viewBoxX: viewBox.x, viewBoxY: viewBox.y };
+                    if (canvasWrap) canvasWrap.classList.add('panning');
+                    try { if (target.setPointerCapture && evt.pointerId != null) target.setPointerCapture(evt.pointerId); } catch (err) {}
+                }
+                return;
+            }
+            if (evt.button !== 0) return;
+
+            var pt = getSvgPoint(evt);
+            var handleEl = evt.target.closest && evt.target.closest('[data-handle]');
+            if (handleEl) {
+                var nodeEl = handleEl.closest('[data-id]');
+                var nodeId = nodeEl ? nodeEl.getAttribute('data-id') : null;
+                if (nodeId && mode === 'select') {
+                    var n = getNodeById(nodeId);
+                    if (n) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        resizingNodeId = nodeId;
+                        resizeHandle = handleEl.getAttribute('data-handle');
+                        resizeStart = { x: pt.x, y: pt.y, w: getNodeW(n), h: getNodeH(n) };
+                        try { if (target.setPointerCapture && evt.pointerId != null) target.setPointerCapture(evt.pointerId); } catch (err) {}
+                    }
+                }
+                return;
+            }
+
+            var info = getNodeIdFromEvent(evt);
+            var nodeId = info.nodeId;
+            var edgeIdx = info.edgeIdx;
+
+            if (nodeId) {
+                handleNodeClick(evt, nodeId, info.pt);
+                return;
+            }
+
+            handleEdgeClick(evt, edgeIdx);
+            if (edgeIdx >= 0) return;
+
+            handleCanvasEmptyClick(evt, info.pt);
+        }
+
         svgEl.addEventListener('mousedown', onCanvasMousedown, true);
 
-        target.addEventListener('mousemove', function (evt) {
+        function onMousemove(evt) {
             if (isPanning && panStart && svgEl) {
                 var rect = svgEl.getBoundingClientRect();
                 viewBox.x = panStart.viewBoxX - (evt.clientX - panStart.clientX) / rect.width * viewBox.w;
                 viewBox.y = panStart.viewBoxY - (evt.clientY - panStart.clientY) / rect.height * viewBox.h;
                 applyViewBox();
+                scheduleRender();
                 return;
             }
             if (resizingNodeId && resizeStart && resizeHandle) {
@@ -585,7 +631,7 @@
                     var dh = (resizeHandle.indexOf('s') >= 0) ? dy : -dy;
                     n.width = Math.max(NODE_MIN_W, resizeStart.w + dw);
                     n.height = Math.max(NODE_MIN_H, resizeStart.h + dh);
-                    render();
+                    scheduleRender();
                 }
                 return;
             }
@@ -595,17 +641,24 @@
                 if (n) {
                     n.x = pt.x - dragOffsetX;
                     n.y = pt.y - dragOffsetY;
-                    render();
+                    scheduleRender();
                 }
                 return;
             }
             var pt = getSvgPoint(evt);
             var overNode = hitTestNode(pt.x, pt.y);
             var overEdge = hitTestEdge(pt.x, pt.y);
-            updatePanCursor(!overNode && overEdge < 0 && mode === 'select');
-        });
+            lastCursorShowPan = !overNode && overEdge < 0 && mode === 'select';
+            if (!cursorUpdateScheduled) {
+                cursorUpdateScheduled = true;
+                requestAnimationFrame(function () {
+                    cursorUpdateScheduled = false;
+                    updatePanCursor(lastCursorShowPan);
+                });
+            }
+        }
 
-        target.addEventListener('mouseup', function () {
+        function onMouseup() {
             if (dragNodeId) {
                 save();
                 dragNodeId = null;
@@ -620,8 +673,9 @@
                 panStart = null;
                 if (canvasWrap) canvasWrap.classList.remove('panning');
             }
-        });
-        target.addEventListener('mouseleave', function () {
+        }
+
+        function onMouseleave() {
             if (dragNodeId) { save(); dragNodeId = null; }
             if (resizingNodeId) {
                 resizingNodeId = null;
@@ -634,13 +688,13 @@
                 if (canvasWrap) canvasWrap.classList.remove('panning');
             }
             updatePanCursor(false);
-        });
+        }
 
-        target.addEventListener('contextmenu', function (evt) {
+        function onContextmenu(evt) {
             evt.preventDefault();
-        });
+        }
 
-        target.addEventListener('wheel', function (evt) {
+        function onWheel(evt) {
             evt.preventDefault();
             if (!svgEl) return;
             var rect = svgEl.getBoundingClientRect();
@@ -654,9 +708,9 @@
             viewBox.w = newW;
             viewBox.h = newH;
             applyViewBox();
-        }, { passive: false });
+        }
 
-        target.addEventListener('dblclick', function (evt) {
+        function onDblclick(evt) {
             if (evt.target.closest && evt.target.closest('[data-handle]')) return;
             if (evt.target.closest && evt.target.closest('.mindmap-node-edit')) return;
             var pt = getSvgPoint(evt);
@@ -667,21 +721,23 @@
                 render();
                 evt.preventDefault();
             }
-        });
+        }
 
-        document.addEventListener('keydown', function (e) {
+        function onKeydown(e) {
             if (e.key === 'Escape') {
                 if (editingNodeId) {
-                    var ed = document.querySelector('.mindmap-node-edit');
+                    var ed = editingNodeEl || document.querySelector('.mindmap-node-edit');
                     if (ed) ed.blur();
                     return;
                 }
-                setMode('select');
-                linkSourceNodeId = null;
-                selectedNodeId = null;
-                selectedEdgeIndex = -1;
-                updatePanCursor(false);
-                render();
+                if (mode !== 'select' || linkSourceNodeId || selectedNodeId !== null || selectedEdgeIndex !== -1) {
+                    setMode('select');
+                    linkSourceNodeId = null;
+                    selectedNodeId = null;
+                    selectedEdgeIndex = -1;
+                    updatePanCursor(false);
+                    render();
+                }
                 return;
             }
             if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -695,32 +751,57 @@
                     doRemoveEdge(selectedEdgeIndex);
                 }
             }
-        });
+        }
 
         var removeBtn = container.querySelector('.mindmap-sidebar [data-action="remove"]') || container.querySelector('[data-mode="delete"]') || container.querySelector('[data-action="remove"]');
-        if (removeBtn) {
-            removeBtn.addEventListener('click', function (evt) {
-                evt.preventDefault();
-                evt.stopPropagation();
-                if (selectedNodeId) {
-                    doRemoveNode(selectedNodeId);
-                } else if (selectedEdgeIndex >= 0) {
-                    doRemoveEdge(selectedEdgeIndex);
-                } else {
-                    setMode('delete');
-                }
-            });
+        function onRemoveClick(evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            if (selectedNodeId) {
+                doRemoveNode(selectedNodeId);
+            } else if (selectedEdgeIndex >= 0) {
+                doRemoveEdge(selectedEdgeIndex);
+            } else {
+                setMode('delete');
+            }
+        }
+        if (removeBtn) removeBtn.addEventListener('click', onRemoveClick);
+
+        target.addEventListener('mousemove', onMousemove);
+        target.addEventListener('mouseup', onMouseup);
+        target.addEventListener('mouseleave', onMouseleave);
+        target.addEventListener('contextmenu', onContextmenu);
+        target.addEventListener('wheel', onWheel, { passive: false });
+        target.addEventListener('dblclick', onDblclick);
+        document.addEventListener('keydown', onKeydown);
+
+        var shapeClickHandlers = [];
+        for (var j = 0; j < shapeButtons.length; j++) {
+            (function (btn, idx) {
+                var handler = function () {
+                    nextShape = btn.getAttribute('data-shape');
+                    for (var k = 0; k < shapeButtons.length; k++) shapeButtons[k].classList.toggle('active', shapeButtons[k].getAttribute('data-shape') === nextShape);
+                };
+                shapeClickHandlers[idx] = handler;
+                btn.addEventListener('click', handler);
+            })(shapeButtons[j], j);
         }
 
-        var shapeBtns = container.querySelectorAll('.mindmap-btn-shape');
-        for (var j = 0; j < shapeBtns.length; j++) {
-            (function (btn) {
-                btn.addEventListener('click', function () {
-                    nextShape = btn.getAttribute('data-shape');
-                    shapeBtns.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-shape') === nextShape); });
-                });
-            })(shapeBtns[j]);
+        function destroy() {
+            svgEl.removeEventListener('mousedown', onCanvasMousedown, true);
+            target.removeEventListener('mousemove', onMousemove);
+            target.removeEventListener('mouseup', onMouseup);
+            target.removeEventListener('mouseleave', onMouseleave);
+            target.removeEventListener('contextmenu', onContextmenu);
+            target.removeEventListener('wheel', onWheel, { passive: false });
+            target.removeEventListener('dblclick', onDblclick);
+            document.removeEventListener('keydown', onKeydown);
+            if (removeBtn) removeBtn.removeEventListener('click', onRemoveClick);
+            for (var j = 0; j < shapeButtons.length; j++) {
+                if (shapeClickHandlers[j]) shapeButtons[j].removeEventListener('click', shapeClickHandlers[j]);
+            }
         }
+        if (window.Mindmap) window.Mindmap.destroy = destroy;
 
         setMode('select');
         var firstRect = container.querySelector('[data-shape="rect"]');
@@ -800,5 +881,6 @@
         img.src = url;
     }
 
-    window.Mindmap = { init: init, load: load, save: save, setMode: setMode, exportToPng: exportToPng, exportToSvg: exportToSvg };
+    function noopDestroy() {}
+    window.Mindmap = { init: init, load: load, save: save, setMode: setMode, exportToPng: exportToPng, exportToSvg: exportToSvg, destroy: noopDestroy };
 })();
