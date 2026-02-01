@@ -9,7 +9,8 @@ const HubData = {
         flashcards: 'hub_flashcards',
         metacognicao: 'hub_metacognicao',
         blurt: 'hub_blurt',
-        activityLog: 'hub_activityLog'
+        activityLog: 'hub_activityLog',
+        mindmap: 'hub_mindmap'
     },
 
     getToday() {
@@ -90,6 +91,17 @@ const HubData = {
             log.dates.push(today);
             this.setActivityLog(log);
         }
+    },
+
+    // Mapa mental: { nodes: [{ id, x, y, text, shape }], edges: [{ from, to }] }
+    getMindmap() {
+        const raw = localStorage.getItem(this.keys.mindmap);
+        if (!raw) return { nodes: [], edges: [] };
+        const data = JSON.parse(raw);
+        return { nodes: data.nodes || [], edges: data.edges || [] };
+    },
+    setMindmap(data) {
+        localStorage.setItem(this.keys.mindmap, JSON.stringify({ nodes: data.nodes || [], edges: data.edges || [] }));
     },
 
     exportAll() {

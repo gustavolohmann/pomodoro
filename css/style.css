@@ -912,6 +912,7 @@ body {
 .stagger-6 { animation-delay: 0.3s; }
 .stagger-7 { animation-delay: 0.35s; }
 .stagger-8 { animation-delay: 0.4s; }
+.stagger-9 { animation-delay: 0.45s; }
 
 /* Botão de ação rápida (Iniciar) */
 .quick-action-btn {
@@ -1808,4 +1809,354 @@ body.has-pomodoro-bar:not(.has-top-bar) {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== Mapa Mental ========== */
+.mindmap-page {
+    overflow: hidden;
+    height: 100vh;
+}
+
+.mindmap-page .top-bar {
+    flex-shrink: 0;
+}
+
+.mindmap-layout {
+    display: flex;
+    height: calc(100vh - 48px);
+    min-height: 0;
+}
+
+/* Sidebar fixa */
+.mindmap-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--card-bg);
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
+    border-right: 1px solid var(--glass-border);
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.mindmap-sidebar-header {
+    margin-bottom: 8px;
+}
+
+.mindmap-back {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.mindmap-back:hover {
+    text-decoration: underline;
+}
+
+.mindmap-not-saved-banner {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(234, 179, 8, 0.12);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    margin-bottom: 16px;
+}
+
+.mindmap-not-saved-icon {
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.mindmap-not-saved-text {
+    margin: 0 0 4px 0;
+    font-size: 0.85rem;
+    color: var(--accent-yellow);
+    font-weight: 500;
+}
+
+.mindmap-not-saved-sub {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.mindmap-btn-download {
+    background: var(--accent-blue);
+    color: var(--bg-start);
+    border-color: var(--accent-blue);
+}
+
+.mindmap-btn-download:hover {
+    filter: brightness(1.1);
+}
+
+.mindmap-icon-download {
+    border: none;
+    background: transparent;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid currentColor;
+    width: 0;
+    height: 0;
+    margin-top: 4px;
+}
+
+.mindmap-sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mindmap-sidebar-title {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.mindmap-sidebar-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mindmap-sidebar-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: var(--secondary-color);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.mindmap-sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--text-secondary);
+}
+
+.mindmap-sidebar-btn.active {
+    background: var(--accent-green);
+    color: var(--bg-start);
+    border-color: var(--accent-green);
+}
+
+.mindmap-sidebar-btn.mindmap-btn-delete.active,
+.mindmap-sidebar-btn[data-action="remove"]:focus {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: #ef4444;
+}
+
+.mindmap-btn-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid currentColor;
+    border-radius: 4px;
+}
+
+.mindmap-icon-circle {
+    border-radius: 50%;
+}
+
+.mindmap-icon-diamond {
+    transform: rotate(45deg);
+}
+
+.mindmap-icon-select {
+    background: linear-gradient(135deg, transparent 40%, currentColor 40%, currentColor 60%, transparent 60%);
+    border: none;
+    width: 18px;
+    height: 18px;
+}
+
+.mindmap-icon-node {
+    border: 2px solid currentColor;
+    background: var(--card-bg);
+}
+
+.mindmap-icon-link {
+    border: none;
+    background: repeating-linear-gradient(90deg, currentColor 0, currentColor 2px, transparent 2px, transparent 8px);
+    height: 2px;
+    width: 18px;
+}
+
+.mindmap-icon-delete {
+    position: relative;
+}
+
+.mindmap-icon-delete::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px;
+    height: 2px;
+    background: currentColor;
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.mindmap-btn-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mindmap-sidebar-hint {
+    margin-top: auto;
+    padding-top: 16px;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+/* Canvas fullscreen */
+.mindmap-canvas-wrap {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    background: var(--secondary-color);
+    cursor: default;
+}
+
+.mindmap-canvas-wrap.panning {
+    cursor: grabbing;
+}
+
+.mindmap-canvas-wrap.pan-cursor {
+    cursor: grab;
+}
+
+.mindmap-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: inherit;
+}
+
+.mindmap-svg .mindmap-node {
+    cursor: grab;
+    /* Hit-area 100%: clique em qualquer área do nó (corpo, texto) inicia ligação/seleção */
+    pointer-events: bounding-box;
+}
+
+.mindmap-svg .mindmap-node:active {
+    cursor: grabbing;
+}
+
+.mindmap-node-shape {
+    fill: var(--card-bg);
+    stroke: var(--accent-green);
+    stroke-width: 2;
+    transition: stroke 0.15s, filter 0.15s;
+    pointer-events: none;
+}
+
+.mindmap-node.selected .mindmap-node-shape {
+    stroke: var(--accent-blue);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
+}
+
+/* Nó selecionado como origem da ligação (modo Criar Ligação) */
+.mindmap-node.link-source .mindmap-node-shape {
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7)) drop-shadow(0 0 4px rgba(56, 189, 248, 0.5));
+}
+
+/* Área de clique em toda a superfície do nó (corpo, texto); não depender da borda */
+.mindmap-node-hit {
+    pointer-events: all;
+}
+
+/* Modo Criar Ligação: cursor indica que o próximo clique cria a ligação */
+.mindmap-canvas-wrap.mindmap-mode-addEdge .mindmap-svg .mindmap-node {
+    cursor: crosshair;
+}
+
+.mindmap-node-text {
+    fill: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    pointer-events: none;
+    user-select: none;
+}
+
+.mindmap-node-edit-wrap {
+    overflow: hidden;
+}
+
+.mindmap-node-edit {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 24px;
+    margin: 0;
+    padding: 4px 6px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+    border: none;
+    resize: none;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    box-sizing: border-box;
+    overflow: auto;
+    cursor: text;
+    pointer-events: all;
+}
+
+.mindmap-node-edit:focus {
+    outline: none;
+}
+
+.mindmap-node-edit:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-secondary);
+}
+
+.mindmap-resize-handle {
+    fill: var(--accent-blue);
+    stroke: var(--text-primary);
+    stroke-width: 1;
+    cursor: nwse-resize;
+    pointer-events: all;
+}
+
+.mindmap-resize-handle[data-handle="sw"],
+.mindmap-resize-handle[data-handle="ne"] {
+    cursor: nesw-resize;
+}
+
+.mindmap-resize-handle[data-handle="nw"],
+.mindmap-resize-handle[data-handle="se"] {
+    cursor: nwse-resize;
+}
+
+.mindmap-edge-line {
+    stroke: var(--text-secondary);
+    stroke-width: 2;
+    fill: none;
+    pointer-events: none;
+    transition: stroke 0.15s;
+}
+
+.mindmap-edges .mindmap-edge.selected + .mindmap-edge-line {
+    stroke: var(--accent-blue);
+    stroke-width: 3;
+}
+
+.mindmap-edge {
+    cursor: pointer;
 }

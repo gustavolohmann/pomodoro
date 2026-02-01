@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Mental - Hub de Estudo</title>
+    <meta name="description" content="Crie mapas mentais online: nós, ligações e formas. Organize ideias visualmente no navegador, sem cadastro. Hub de Métodos de Estudo.">
+    <link rel="canonical" href="https://www.godtimestudy.com.br/pages/mapa-mental.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Mapa Mental - Hub de Estudo">
+    <meta property="og:description" content="Crie mapas mentais online: nós, ligações e formas. Organize ideias visualmente no navegador, sem cadastro.">
+    <meta property="og:url" content="https://www.godtimestudy.com.br/pages/mapa-mental.html">
+    <meta property="og:image" content="https://www.godtimestudy.com.br/pomodoro.jpg">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Mapa Mental - Hub de Estudo">
+    <meta name="twitter:description" content="Crie mapas mentais online: nós, ligações e formas. Sem cadastro.">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="method-page has-top-bar mindmap-page">
+    <div class="background-gradient"></div>
+    <header class="top-bar">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="index.html" data-i18n="hub">Hub</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-current" data-i18n="mindmap">Mapa Mental</span>
+        </nav>
+        <span id="langSelector"></span>
+    </header>
+
+    <div class="mindmap-layout" id="mindmapLayout">
+        <aside class="mindmap-sidebar" aria-label="Ferramentas do mapa mental">
+            <div class="mindmap-sidebar-header">
+                <a href="index.html" class="mindmap-back" data-i18n="backToHub">← Voltar ao Hub</a>
+            </div>
+            <div class="mindmap-not-saved-banner" role="alert">
+                <span class="mindmap-not-saved-icon" aria-hidden="true">⚠️</span>
+                <p class="mindmap-not-saved-text" data-i18n="mindmapNotSavedWarning">Este mapa mental não é salvo automaticamente.</p>
+                <p class="mindmap-not-saved-sub" data-i18n="mindmapDownloadBeforeLeave">Baixe o mapa antes de sair da página.</p>
+            </div>
+            <div class="mindmap-sidebar-section">
+                <span class="mindmap-sidebar-title" data-i18n="mindmapShape">Forma do nó</span>
+                <div class="mindmap-sidebar-buttons">
+                    <button type="button" class="mindmap-sidebar-btn mindmap-btn-shape active" data-shape="rect" title="Retângulo" aria-label="Criar nó retângulo">
+                        <span class="mindmap-btn-icon mindmap-icon-rect"></span>
+                        <span class="mindmap-btn-label" data-i18n="mindmapShapeRect">Retângulo</span>
+                    </button>
+                    <button type="button" class="mindmap-sidebar-btn mindmap-btn-shape" data-shape="circle" title="Elipse" aria-label="Criar nó elipse">
+                        <span class="mindmap-btn-icon mindmap-icon-circle"></span>
+                        <span class="mindmap-btn-label" data-i18n="mindmapShapeCircle">Elipse</span>
+                    </button>
+                    <button type="button" class="mindmap-sidebar-btn mindmap-btn-shape" data-shape="diamond" title="Losango" aria-label="Criar nó losango">
+                        <span class="mindmap-btn-icon mindmap-icon-diamond"></span>
+                        <span class="mindmap-btn-label" data-i18n="mindmapShapeDiamond">Losango</span>
+                    </button>
+                </div>
+            </div>
+            <div class="mindmap-sidebar-section">
+                <span class="mindmap-sidebar-title" data-i18n="mindmapActions">Ações</span>
+                <div class="mindmap-sidebar-buttons">
+                    <button type="button" class="mindmap-sidebar-btn mindmap-btn-mode active" data-mode="select">
+                        <span class="mindmap-btn-icon mindmap-icon-select"></span>
+                        <span class="mindmap-btn-label" data-i18n="mindmapModeSelect">Selecionar / Mover</span>
+                    </button>
+                    <button type="button" class="mindmap-sidebar-btn mindmap-btn-mode" data-mode="addNode">
+                        <span class="mindmap-btn-icon mindmap-icon-node"></span>
+                        <span class="mindmap-btn-label" data-i18n="mindmapModeAddNode">Novo nó</span>
+                    </button>
+                    <button type="button" class="mindmap-sidebar-btn mindmap-btn-mode" data-mode="addEdge">
+                        <span class="mindmap-btn-icon mindmap-icon-link"></span>
+                        <span class="mindmap-btn-label" data-i18n="mindmapModeAddEdge">Nova ligação</span>
+                    </button>
+                    <button type="button" class="mindmap-sidebar-btn mindmap-btn-mode mindmap-btn-delete" data-mode="delete" data-action="remove">
+                        <span class="mindmap-btn-icon mindmap-icon-delete"></span>
+                        <span class="mindmap-btn-label" data-i18n="mindmapRemove">Apagar</span>
+                    </button>
+                </div>
+            </div>
+            <div class="mindmap-sidebar-section">
+                <button type="button" class="mindmap-sidebar-btn mindmap-btn-download" id="mindmapDownloadPng" data-export="png">
+                    <span class="mindmap-btn-icon mindmap-icon-download"></span>
+                    <span class="mindmap-btn-label" data-i18n="mindmapDownloadPng">Baixar mapa (PNG)</span>
+                </button>
+                <button type="button" class="mindmap-sidebar-btn mindmap-btn-download" id="mindmapDownloadSvg" data-export="svg">
+                    <span class="mindmap-btn-icon mindmap-icon-download"></span>
+                    <span class="mindmap-btn-label" data-i18n="mindmapDownloadSvg">Baixar mapa (SVG)</span>
+                </button>
+            </div>
+            <p class="mindmap-sidebar-hint" data-i18n="mindmapHint">Novo nó: clique no canvas. Nova ligação: clique em dois nós. Duplo clique no nó para editar. Esc cancela.</p>
+        </aside>
+        <div class="mindmap-canvas-wrap" id="mindmapCanvasWrap">
+            <svg class="mindmap-svg" id="mindmapSvg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="mindmap-grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <line x1="0" y1="0" x2="0" y2="40" stroke="rgba(255,255,255,0.06)" stroke-width="0.4"/>
+                        <line x1="0" y1="0" x2="40" y2="0" stroke="rgba(255,255,255,0.06)" stroke-width="0.4"/>
+                    </pattern>
+                </defs>
+                <rect class="mindmap-grid-bg" x="-2000" y="-2000" width="4000" height="4000" fill="url(#mindmap-grid-pattern)" pointer-events="none"/>
+                <g class="mindmap-edges"></g>
+                <g class="mindmap-nodes"></g>
+            </svg>
+        </div>
+    </div>
+
+    <script src="../lang/pt-BR.js"></script>
+    <script src="../lang/en.js"></script>
+    <script src="../lang/es.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/pomodoro.js"></script>
+    <script src="../js/pomodoro-header.js"></script>
+    <script src="../js/mindmap.js"></script>
+    <script>
+        (function () {
+            var layout = document.getElementById('mindmapLayout');
+            if (layout) {
+                Mindmap.init(layout);
+                layout.querySelectorAll('.mindmap-btn-mode').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        Mindmap.setMode(btn.getAttribute('data-mode'));
+                    });
+                });
+                var btnPng = document.getElementById('mindmapDownloadPng');
+                if (btnPng) btnPng.addEventListener('click', function () { Mindmap.exportToPng(); });
+                var btnSvg = document.getElementById('mindmapDownloadSvg');
+                if (btnSvg) btnSvg.addEventListener('click', function () { Mindmap.exportToSvg(); });
+            }
+        })();
+    </script>
+</body>
+</html>
