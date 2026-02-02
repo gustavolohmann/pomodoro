@@ -83,6 +83,12 @@
             <p class="hub-stats-hint" id="statsHint" data-i18n="statsZeroHint" style="display: none;">Estude hoje para ver seu progresso</p>
             <p class="hub-stats-hint hub-first-visit-hint" id="firstVisitHint" data-i18n="firstVisitHint" style="display: none;">Comece por um Pomodoro ou crie seus primeiros flashcards</p>
 
+            <!-- Acesso rápido: Backup e Apoie (visível sem scroll) -->
+            <nav class="hub-quick-access" aria-label="Acesso rápido" data-i18n-aria-label="quickAccessLabel">
+                <a href="#hubBackup" class="hub-quick-access-link hub-quick-backup"><span class="hub-quick-icon" aria-hidden="true">🔒</span> <span data-i18n="backupTitle">Backup & Segurança</span></a>
+                <a href="#hubSupport" class="hub-quick-access-link hub-quick-support"><span class="hub-quick-icon" aria-hidden="true">❤️</span> <span data-i18n="supportTitle">Apoie o projeto</span></a>
+            </nav>
+
             <!-- Methods Grid -->
             <main class="hub-methods-grid" id="hubGrid">
                 <a href="pomodoro.html" class="method-card fade-in stagger-2">
@@ -179,24 +185,28 @@
                 </div>
             </section>
 
-            <!-- Backup -->
-            <div class="hub-backup fade-in">
-                <h2 class="hub-section-title">💾 <span data-i18n="backupTitle">Backup & Segurança</span></h2>
-                <p class="hub-disclaimer" data-i18n="dataDisclaimer">Não armazenamos seus dados. Tudo fica apenas no seu navegador. O backup dos seus estudos é de sua responsabilidade — use Exportar para guardar uma cópia.</p>
+            <!-- Backup & Segurança -->
+            <div class="hub-backup fade-in" id="hubBackup" role="region" aria-labelledby="backup-heading">
+                <h2 id="backup-heading" class="hub-backup-title"><span class="hub-backup-icon" aria-hidden="true">🔒</span> <span data-i18n="backupTitle">Backup & Segurança</span></h2>
+                <ul class="hub-backup-bullets">
+                    <li data-i18n="backupBullet1">Seus dados ficam apenas no navegador.</li>
+                    <li data-i18n="backupBullet2">Nada é salvo na nuvem.</li>
+                    <li data-i18n="backupBullet3">Exporte periodicamente para não perder nada.</li>
+                </ul>
                 <div class="hub-backup-buttons">
-                    <button type="button" class="btn btn-secondary" id="exportBtn" data-i18n="exportBtn">Exportar dados (JSON)</button>
+                    <button type="button" class="btn btn-primary" id="exportBtn" data-i18n="exportBtn">Exportar dados (JSON)</button>
                     <button type="button" class="btn btn-secondary" id="importBtn" data-i18n="importBtn">Importar dados</button>
-                    <button type="button" class="btn btn-secondary" id="resetBtn" data-i18n="resetBtn">Resetar sistema</button>
+                    <button type="button" class="btn btn-danger" id="resetBtn" data-i18n="resetBtn">Resetar sistema</button>
                 </div>
                 <input type="file" id="importFile" accept=".json" style="display: none;">
             </div>
 
             <!-- Apoie o projeto -->
-            <div class="hub-support fade-in" id="hubSupport">
-                <h2 class="hub-section-title">☕ <span data-i18n="supportTitle">Apoie o projeto</span></h2>
+            <div class="hub-support fade-in" id="hubSupport" role="region" aria-labelledby="support-heading">
+                <h2 id="support-heading" class="hub-support-title">❤️ <span data-i18n="supportTitle">Apoie o projeto</span></h2>
                 <p class="hub-support-text" data-i18n="supportText">Se o hub te ajudou nos estudos, você pode mandar um trocado. Não é obrigatório.</p>
                 <div class="hub-support-options" id="hubSupportOptions">
-                    <div class="hub-support-option" data-support="pix">
+                    <div class="hub-support-option hub-support-pix" data-support="pix">
                         <span class="hub-support-label" data-i18n="supportPix">No Brasil: PIX</span>
                         <span class="hub-support-value" id="supportPixKey">gustavolohmannlinz@gmail.com</span>
                         <button type="button" class="btn btn-secondary hub-support-copy" id="copyPixBtn" data-i18n="supportCopy">Copiar</button>
@@ -211,9 +221,9 @@
                         </a>
                     </div>
                 </div>
-                <div class="hub-support-security">
+                <div class="hub-support-security" role="status">
                     <span class="hub-support-security-icon" aria-hidden="true">🔒</span>
-                    <span class="hub-support-security-text"><span data-i18n="supportSecurityText">Só doe por este endereço:</span> <strong id="supportOfficialUrl">www.godtimestudy.com.br</strong></span>
+                    <span class="hub-support-security-text"><span data-i18n="supportSecurityNotice">Só doe por este endereço oficial:</span> <strong id="supportOfficialUrl">www.godtimestudy.com.br</strong></span>
                 </div>
             </div>
         </div>
@@ -381,7 +391,8 @@
                 var btn = document.getElementById('copyPixBtn');
                 var orig = btn.textContent;
                 btn.textContent = window.I18n ? window.I18n.t('supportCopied') : 'Copiado!';
-                setTimeout(function() { btn.textContent = orig; }, 2000);
+                btn.classList.add('copied');
+                setTimeout(function() { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
             });
         });
 

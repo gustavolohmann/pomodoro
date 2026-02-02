@@ -34,6 +34,7 @@ html {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -45,18 +46,18 @@ body {
     overflow-x: hidden;
     position: relative;
     color: var(--text-primary);
-    background: transparent;
+    background: var(--bg-start);
 }
 
-/* Background - gradiente escuro fixo */
+/* Background - gradiente escuro fixo (evitar 100vw para não criar listra branca com scrollbar) */
 .background-gradient {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    min-width: 100%;
-    min-height: 100%;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
     background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
     z-index: -1;
 }
@@ -812,6 +813,56 @@ body {
     margin-top: 4px;
 }
 
+/* Acesso rápido: Backup e Apoie (visível sem scroll) */
+.hub-quick-access {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+    justify-content: center;
+}
+
+.hub-quick-access-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 44px;
+}
+
+.hub-quick-backup {
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--accent-green);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.hub-quick-backup:hover {
+    background: rgba(34, 197, 94, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.2);
+}
+
+.hub-quick-support {
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent-blue);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.hub-quick-support:hover {
+    background: rgba(56, 189, 248, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.2);
+}
+
+.hub-quick-icon {
+    font-size: 1.1rem;
+}
+
 /* Grid de métodos */
 .hub-methods-grid {
     display: grid;
@@ -971,10 +1022,51 @@ body {
     border-top: 1px solid var(--card-border);
 }
 
+/* Backup & Segurança: destaque visual, hierarquia clara */
 .hub-backup {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--card-border);
+    margin-top: 40px;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.06);
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.08);
+}
+
+.hub-backup-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hub-backup-icon {
+    font-size: 1.25rem;
+}
+
+.hub-backup-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.hub-backup-bullets li {
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.hub-backup-bullets li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--accent-green);
+    font-weight: 700;
 }
 
 .hub-section-title {
@@ -1024,12 +1116,26 @@ body {
 .hub-backup-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
 .hub-backup-buttons .btn {
     flex: 1;
     min-width: 140px;
+}
+
+/* Botão danger: resetar sistema */
+.btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 /* Guias / Conteúdos na home */
@@ -1057,10 +1163,21 @@ body {
     border-color: var(--accent-blue);
 }
 
+/* Apoie o projeto: hierarquia elevada, separação clara */
 .hub-support {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--card-border);
+    margin-top: 40px;
+    padding: 28px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.hub-support-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 12px 0;
 }
 
 .hub-support-text {
@@ -1086,6 +1203,17 @@ body {
     border: 1px solid var(--card-border);
     border-radius: 12px;
     min-width: 0;
+}
+
+.hub-support-pix {
+    border-color: rgba(34, 197, 94, 0.25);
+    background: rgba(34, 197, 94, 0.06);
+}
+
+.hub-support-copy.copied {
+    background: var(--accent-green);
+    color: #0f172a;
+    border-color: var(--accent-green);
 }
 
 .hub-support-label {
@@ -1148,11 +1276,11 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 16px;
-    padding: 12px 14px;
-    background: rgba(34, 197, 94, 0.08);
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    border-radius: 10px;
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 12px;
     font-size: 13px;
     color: var(--text-secondary);
 }
