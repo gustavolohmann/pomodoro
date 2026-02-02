@@ -168,7 +168,7 @@ window.LANG_ES = {
     mindmapShortDesc: 'Nodos y enlaces',
     mindmapDesc: 'Crea nodos y enlaces para organizar ideas. Arrastra nodos, doble clic para editar texto. Usa la barra para añadir o quitar.',
     mindmapMode: 'Modo:',
-    mindmapModeSelect: 'Seleccionar / Mover',
+    mindmapModeSelect: 'Editar / Mover',
     mindmapModeAddNode: 'Nuevo nodo',
     mindmapModeAddEdge: 'Nueva conexión',
     mindmapRemove: 'Quitar',

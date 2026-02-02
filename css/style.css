@@ -1529,20 +1529,24 @@ body.has-pomodoro-bar:not(.has-top-bar) {
 }
 
 .mindmap-sidebar-header .back-link {
-    color: var(--accent-blue);
-    text-decoration: none;
-    font-size: 0.9rem;
-    background: transparent;
-    border: none;
-    padding: 10px 0;
-    margin: 0;
-    min-height: 44px;
     display: inline-flex;
     align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: var(--text-primary);
+    text-decoration: none;
+    margin-bottom: 0;
+    padding: 10px 16px;
+    background: var(--secondary-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
 }
 
 .mindmap-sidebar-header .back-link:hover {
-    text-decoration: underline;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
 }
 
 /* ========== Dashboard full-screen ========== */
@@ -1962,6 +1966,22 @@ body.has-pomodoro-bar:not(.has-top-bar) {
     margin-bottom: 8px;
 }
 
+.mindmap-sidebar .mindmap-seo-links {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    margin: 0 0 12px 0;
+}
+
+.mindmap-sidebar .mindmap-seo-links a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.mindmap-sidebar .mindmap-seo-links a:hover {
+    text-decoration: underline;
+}
+
 
 .mindmap-not-saved-banner {
     padding: 10px 12px;
@@ -2116,14 +2136,6 @@ body.has-pomodoro-bar:not(.has-top-bar) {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.mindmap-sidebar-hint {
-    margin-top: auto;
-    padding-top: 16px;
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-    line-height: 1.4;
 }
 
 /* Canvas fullscreen */

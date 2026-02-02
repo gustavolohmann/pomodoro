@@ -168,7 +168,7 @@ window.LANG_EN = {
     mindmapShortDesc: 'Nodes and links',
     mindmapDesc: 'Create nodes and links to organize ideas. Drag nodes, double-click to edit text. Use the toolbar to add or remove.',
     mindmapMode: 'Mode:',
-    mindmapModeSelect: 'Select / Move',
+    mindmapModeSelect: 'Edit / Move',
     mindmapModeAddNode: 'New node',
     mindmapModeAddEdge: 'New link',
     mindmapRemove: 'Remove',

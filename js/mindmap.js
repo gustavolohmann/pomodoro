@@ -555,8 +555,7 @@
             if (mode === 'addNode') {
                 evt.preventDefault();
                 evt.stopPropagation();
-                var text = (i18n.t('mindmapNewNodeLabel') || 'Novo nó').trim();
-                nodes.push({ id: generateId(), x: pt.x, y: pt.y, text: text, shape: nextShape, width: NODE_WIDTH, height: NODE_HEIGHT });
+                nodes.push({ id: generateId(), x: pt.x, y: pt.y, text: '', shape: nextShape, width: NODE_WIDTH, height: NODE_HEIGHT });
                 save();
                 render();
                 return;

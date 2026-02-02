@@ -168,7 +168,7 @@ window.LANG_PT_BR = {
     mindmapShortDesc: 'Nós e ligações',
     mindmapDesc: 'Crie nós e ligações para organizar ideias. Arraste nós, dê duplo clique para editar o texto. Use a barra de ferramentas para adicionar ou remover.',
     mindmapMode: 'Modo:',
-    mindmapModeSelect: 'Selecionar / Mover',
+    mindmapModeSelect: 'Editar / Mover',
     mindmapModeAddNode: 'Novo nó',
     mindmapModeAddEdge: 'Nova ligação',
     mindmapRemove: 'Apagar',
