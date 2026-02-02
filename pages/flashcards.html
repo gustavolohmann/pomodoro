@@ -38,7 +38,7 @@
         <span id="langSelector"></span>
     </header>
     <div class="container">
-        <a href="index.html" class="back-link" data-i18n="backToHub">← Voltar ao Hub</a>
+        <a href="index.html" class="back-link" data-i18n="backLinkText">← Voltar ao Hub</a>
         <div class="glass-card">
             <div id="cardPomodoroStatus" class="card-pomodoro-status"></div>
             <header class="header">
@@ -56,7 +56,7 @@
 
             <h2 class="hub-section-title" style="margin-top: 24px;" data-i18n="yourCards">Seus cards</h2>
             <div id="cardsList"></div>
-            <p class="seo-outros-links">Outros métodos de estudo: <a href="index.html">Hub</a>, <a href="pomodoro.html">Pomodoro</a>, <a href="active-recall.html">Active Recall</a>.</p>
+            <p class="seo-outros-links">Saiba mais: <a href="como-estudar-com-flashcards.html">Como estudar com Flashcards (guia)</a>. Outros métodos: <a href="index.html">Hub</a>, <a href="pomodoro.html">Pomodoro</a>, <a href="active-recall.html">Active Recall</a>.</p>
         </div>
     </div>
     <script src="../lang/pt-BR.js"></script>
@@ -94,9 +94,19 @@
             el.querySelectorAll('[data-id]').forEach(btn => {
                 btn.onclick = function() {
                     const id = this.dataset.id;
-                    const cards = HubData.getFlashcards().filter(c => c.id !== id);
-                    HubData.setFlashcards(cards);
-                    loadCards();
+                    Modal.show({
+                        type: 'warning',
+                        title: window.I18n ? window.I18n.t('modalConfirmDeleteTitle') : 'Confirmar exclusão',
+                        message: window.I18n ? window.I18n.t('modalConfirmDeleteCard') : 'Remover este card? Não é possível desfazer.',
+                        showCancel: true,
+                        cancelLabel: window.I18n ? window.I18n.t('modalCancel') : 'Cancelar',
+                        confirmLabel: window.I18n ? window.I18n.t('modalRemove') : 'Remover',
+                        onConfirm: function() {
+                            const cards = HubData.getFlashcards().filter(c => c.id !== id);
+                            HubData.setFlashcards(cards);
+                            loadCards();
+                        }
+                    });
                 };
             });
         }
@@ -111,12 +121,21 @@
                 Modal.show({ type: 'warning', title: t('modalWarning'), message: t('fillQuestionAnswer'), showCancel: false, confirmLabel: t('modalOk') });
                 return;
             }
-            const cards = HubData.getFlashcards();
-            cards.push({ id: 'c_' + Date.now(), question: q || qPlain, answer: a || aPlain, nextReview: HubData.getToday(), intervalIndex: 0 });
-            HubData.setFlashcards(cards);
-            newQuestionRte.clear();
-            newAnswerRte.clear();
-            loadCards();
+            var btn = document.getElementById('addCardBtn');
+            var origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = (window.I18n ? window.I18n.t('saving') : 'Salvando...');
+            setTimeout(function() {
+                const cards = HubData.getFlashcards();
+                cards.push({ id: 'c_' + Date.now(), question: q || qPlain, answer: a || aPlain, nextReview: HubData.getToday(), intervalIndex: 0 });
+                HubData.setFlashcards(cards);
+                newQuestionRte.clear();
+                newAnswerRte.clear();
+                loadCards();
+                btn.disabled = false;
+                btn.textContent = origText;
+                if (window.showToast && window.I18n) window.showToast(window.I18n.t('toastSavedSuccess'));
+            }, 150);
         });
 
         loadCards();

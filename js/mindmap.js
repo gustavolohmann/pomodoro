@@ -454,6 +454,13 @@
         load();
         applyViewBox();
 
+        window.addEventListener('beforeunload', function (e) {
+            if (nodes.length > 0 || edges.length > 0) {
+                e.preventDefault();
+                if (e.returnValue !== undefined) e.returnValue = '';
+            }
+        });
+
         var target = canvasWrap || container;
         var lastCursorShowPan = false;
 

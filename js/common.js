@@ -81,6 +81,36 @@
         container.appendChild(select);
     }
 
+    function ensureToast() {
+        var el = document.getElementById('toast');
+        if (el) return el;
+        el = document.createElement('div');
+        el.id = 'toast';
+        el.className = 'toast';
+        el.setAttribute('role', 'status');
+        el.setAttribute('aria-live', 'polite');
+        var inner = document.createElement('div');
+        inner.className = 'toast-content';
+        var span = document.createElement('span');
+        span.id = 'toastMessage';
+        inner.appendChild(span);
+        el.appendChild(inner);
+        document.body.appendChild(el);
+        return el;
+    }
+
+    function showToast(message) {
+        var el = ensureToast();
+        var msgEl = el.querySelector('#toastMessage') || el.querySelector('.toast-content span');
+        if (msgEl) msgEl.textContent = message;
+        el.classList.add('show');
+        if (window._toastTimer) clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(function() {
+            el.classList.remove('show');
+            window._toastTimer = null;
+        }, 2500);
+    }
+
     window.I18n = {
         t: t,
         setLang: setLang,
@@ -89,6 +119,7 @@
         renderLangSelector: renderLangSelector,
         LANGUAGES: LANGUAGES
     };
+    window.showToast = showToast;
 
     document.addEventListener('DOMContentLoaded', function() {
         setLang(getLang());

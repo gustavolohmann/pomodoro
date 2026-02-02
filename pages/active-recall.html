@@ -38,34 +38,34 @@
         <span id="langSelector"></span>
     </header>
     <div class="container">
-        <a href="index.html" class="back-link" data-i18n="backToHub">← Voltar ao Hub</a>
+        <a href="index.html" class="back-link" data-i18n="backLinkText">← Voltar ao Hub</a>
         <div class="glass-card">
             <div id="cardPomodoroStatus" class="card-pomodoro-status"></div>
             <header class="header">
                 <h1 class="app-title">🧠 <span data-i18n="activeRecall">Active Recall</span></h1>
             </header>
-            <p class="hub-intro">Forçar o cérebro a recuperar a informação. Escolha um card, tente responder sem consultar, depois revele e marque desempenho. Impacta o Spaced Repetition.</p>
+            <p class="hub-intro" data-i18n="activeRecallIntro">Forçar o cérebro a recuperar a informação. Escolha um card, tente responder sem consultar, depois revele e marque desempenho. Impacta o Spaced Repetition.</p>
 
             <div id="pickArea">
-                <p style="color: var(--text-secondary); margin-bottom: 12px;">Usa seus flashcards. Um card aleatório será sorteado.</p>
-                <button type="button" class="btn btn-primary" id="pickCardBtn">Sortear card</button>
+                <p class="active-recall-pick-hint" style="color: var(--text-secondary); margin-bottom: 12px;" data-i18n="activeRecallPickHint">Usa seus flashcards. Um card aleatório será sorteado.</p>
+                <button type="button" class="btn btn-primary" id="pickCardBtn" data-i18n="pickCard">Sortear card</button>
             </div>
             <div id="recallArea" style="display: none;">
                 <div class="glass-card" style="padding: 24px; margin: 16px 0;">
-                    <div class="hub-section-title">Pergunta</div>
+                    <div class="hub-section-title" data-i18n="question">Pergunta</div>
                     <div id="recallQuestion" style="font-size: 18px; margin: 12px 0;"></div>
                 </div>
                 <div class="setting-group">
-                    <label>Sua resposta (opcional)</label>
+                    <label data-i18n="myAnswer">Sua resposta (opcional)</label>
                     <div id="myAnswerRte"></div>
                 </div>
-                <button type="button" class="btn btn-secondary" id="revealBtn">Revelar resposta correta</button>
+                <button type="button" class="btn btn-secondary" id="revealBtn" data-i18n="reveal">Revelar resposta correta</button>
                 <div id="correctBlock" style="display: none; margin-top: 16px;">
-                    <div class="hub-section-title">Resposta correta</div>
+                    <div class="hub-section-title" data-i18n="correctAnswer">Resposta correta</div>
                     <div id="correctAnswer" style="padding: 12px; background: var(--secondary-color); border-radius: 12px; margin: 8px 0;"></div>
                     <div class="controls" style="grid-template-columns: 1fr 1fr;">
-                        <button type="button" class="btn btn-primary" id="btnAcertou">Acertei</button>
-                        <button type="button" class="btn btn-secondary" id="btnErrei">Errei</button>
+                        <button type="button" class="btn btn-primary" id="btnAcertou" data-i18n="correct">Acertei</button>
+                        <button type="button" class="btn btn-secondary" id="btnErrei" data-i18n="wrong">Errei</button>
                     </div>
                 </div>
             </div>
@@ -84,7 +84,7 @@
     <script>
         function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         let currentCard = null;
-        var myAnswerRte = RichTextEditor.create(document.getElementById('myAnswerRte'), { placeholder: 'Escreva ou pense a resposta...', minHeight: 80 });
+        var myAnswerRte = RichTextEditor.create(document.getElementById('myAnswerRte'), { placeholder: t('myAnswerPlaceholder'), minHeight: 80 });
 
         document.getElementById('pickCardBtn').addEventListener('click', function() {
             const cards = HubData.getFlashcards();
@@ -92,13 +92,21 @@
                 Modal.show({ type: 'warning', title: t('modalWarning'), message: t('createFlashcardsFirst'), showCancel: false, confirmLabel: t('modalOk') });
                 return;
             }
-            currentCard = cards[Math.floor(Math.random() * cards.length)];
-            var qEl = document.getElementById('recallQuestion');
-            if (currentCard.question && currentCard.question.indexOf('<') !== -1) qEl.innerHTML = currentCard.question; else qEl.textContent = currentCard.question || '';
-            myAnswerRte.clear();
-            document.getElementById('correctBlock').style.display = 'none';
-            document.getElementById('recallArea').style.display = 'block';
-            document.getElementById('pickArea').style.display = 'none';
+            var btn = document.getElementById('pickCardBtn');
+            var origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = t('picking');
+            setTimeout(function() {
+                currentCard = cards[Math.floor(Math.random() * cards.length)];
+                var qEl = document.getElementById('recallQuestion');
+                if (currentCard.question && currentCard.question.indexOf('<') !== -1) qEl.innerHTML = currentCard.question; else qEl.textContent = currentCard.question || '';
+                myAnswerRte.clear();
+                document.getElementById('correctBlock').style.display = 'none';
+                document.getElementById('recallArea').style.display = 'block';
+                document.getElementById('pickArea').style.display = 'none';
+                btn.disabled = false;
+                btn.textContent = origText;
+            }, 120);
         });
 
         document.getElementById('revealBtn').addEventListener('click', function() {

@@ -104,8 +104,10 @@ body {
     background: var(--secondary-color);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
-    width: 40px;
-    height: 40px;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -245,7 +247,8 @@ body {
 }
 
 .btn {
-    padding: 14px 24px;
+    padding: 12px 24px;
+    min-height: 44px;
     border: 1px solid var(--glass-border);
     border-radius: 12px;
     font-size: 15px;
@@ -722,14 +725,6 @@ body {
     .hub-page .hub-main-title { font-size: 1.875rem; }
 }
 
-.hub-page .hub-intro-seo {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    max-width: 520px;
-    margin: 0 auto 0.5rem;
-    line-height: 1.45;
-}
-
 .hub-page .hub-subtitle {
     font-size: 1rem;
     color: var(--text-secondary);
@@ -805,6 +800,17 @@ body {
 .hub-stat-value.streak { color: var(--accent-green); }
 .hub-stat-value.today { color: var(--accent-blue); }
 .hub-stat-value.cards { color: var(--accent-purple); }
+
+.hub-stats-hint {
+    margin: -16px 0 24px 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.hub-first-visit-hint {
+    margin-top: 4px;
+}
 
 /* Grid de métodos */
 .hub-methods-grid {
@@ -959,6 +965,12 @@ body {
 }
 
 /* Backup no Hub */
+.hub-section {
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--card-border);
+}
+
 .hub-backup {
     margin-top: 32px;
     padding-top: 24px;
@@ -1018,6 +1030,31 @@ body {
 .hub-backup-buttons .btn {
     flex: 1;
     min-width: 140px;
+}
+
+/* Guias / Conteúdos na home */
+.hub-guias-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.guia-link-card {
+    display: inline-block;
+    padding: 12px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.guia-link-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--accent-blue);
 }
 
 .hub-support {
@@ -1167,6 +1204,7 @@ body {
 .lang-select:focus {
     outline: none;
     border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
 }
 
 .lang-select option {
@@ -1350,6 +1388,7 @@ body.has-pomodoro-bar:not(.has-top-bar) {
     outline: none;
     border-color: var(--accent-green);
     color: var(--accent-green);
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
 }
 
 .rte-editor {
@@ -1452,6 +1491,7 @@ body.has-pomodoro-bar:not(.has-top-bar) {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 44px;
     color: var(--text-primary);
     text-decoration: none;
     margin-bottom: 16px;
@@ -1466,6 +1506,43 @@ body.has-pomodoro-bar:not(.has-top-bar) {
 .method-page .back-link:hover {
     background: rgba(255, 255, 255, 0.15);
     transform: translateY(-2px);
+}
+
+.guia-page-wrap .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: var(--text-primary);
+    text-decoration: none;
+    margin-bottom: 24px;
+    padding: 10px 20px;
+    background: var(--secondary-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    backdrop-filter: blur(var(--blur-amount));
+    transition: all 0.2s ease;
+}
+
+.guia-page-wrap .back-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.mindmap-sidebar-header .back-link {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-size: 0.9rem;
+    background: transparent;
+    border: none;
+    padding: 10px 0;
+    margin: 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.mindmap-sidebar-header .back-link:hover {
+    text-decoration: underline;
 }
 
 /* ========== Dashboard full-screen ========== */
@@ -1744,6 +1821,7 @@ body.has-pomodoro-bar:not(.has-top-bar) {
 
 .task-list .task-name:focus {
     outline: none;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
 .task-list .task-desc {
@@ -1760,6 +1838,7 @@ body.has-pomodoro-bar:not(.has-top-bar) {
 
 .task-list .task-desc:focus {
     outline: none;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
 .task-list .task-desc::placeholder {
@@ -1777,6 +1856,7 @@ body.has-pomodoro-bar:not(.has-top-bar) {
 
 .task-list .task-text:focus {
     outline: none;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
 /* Ivy Lee: formulário de nova tarefa */
@@ -1882,15 +1962,6 @@ body.has-pomodoro-bar:not(.has-top-bar) {
     margin-bottom: 8px;
 }
 
-.mindmap-back {
-    color: var(--accent-blue);
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.mindmap-back:hover {
-    text-decoration: underline;
-}
 
 .mindmap-not-saved-banner {
     padding: 10px 12px;
@@ -2155,6 +2226,7 @@ body.has-pomodoro-bar:not(.has-top-bar) {
 
 .mindmap-node-edit:focus {
     outline: none;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4);
 }
 
 .mindmap-node-edit:empty::before {
@@ -2195,4 +2267,164 @@ body.has-pomodoro-bar:not(.has-top-bar) {
 
 .mindmap-edge {
     cursor: pointer;
+}
+
+/* Páginas de conteúdo / guias (SEO-first) */
+.guia-page-wrap {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 40px 20px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.guia-breadcrumb {
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.guia-breadcrumb a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.guia-breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.guia-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    margin-bottom: 24px;
+    padding: 10px 20px;
+    background: var(--secondary-color);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    backdrop-filter: blur(var(--blur-amount));
+    transition: all 0.2s ease;
+}
+
+.guia-back-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.guia-section {
+    margin-bottom: 32px;
+}
+
+.guia-section h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.guia-section h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin: 28px 0 12px 0;
+    color: var(--text-primary);
+}
+
+.guia-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 20px 0 8px 0;
+    color: var(--text-primary);
+}
+
+.guia-section p {
+    line-height: 1.75;
+    margin-bottom: 14px;
+    color: var(--text-secondary);
+}
+
+.guia-section ul,
+.guia-section ol {
+    margin: 12px 0;
+    padding-left: 24px;
+    color: var(--text-secondary);
+}
+
+.guia-section li {
+    margin-bottom: 8px;
+    line-height: 1.65;
+}
+
+.guia-highlight {
+    background: rgba(56, 189, 248, 0.1);
+    border-left: 4px solid var(--accent-blue);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.guia-highlight p {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.guia-cta-box {
+    margin-top: 32px;
+    padding: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.guia-cta-box p {
+    margin-bottom: 16px;
+    color: var(--text-primary);
+}
+
+.guia-cta-box .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.guia-cta-box .btn-primary {
+    background: var(--accent-green);
+    color: #0f172a;
+    border: none;
+}
+
+.guia-cta-box .btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.guia-outros {
+    margin-top: 24px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.guia-outros a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.guia-outros a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .guia-page-wrap {
+        padding: 20px 16px;
+    }
+    .guia-section h1 {
+        font-size: 1.5rem;
+    }
+    .guia-section h2 {
+        font-size: 1.2rem;
+    }
 }

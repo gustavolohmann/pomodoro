@@ -30,7 +30,7 @@
     {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Hub","item":"https://www.godtimestudy.com.br/pages/index.html"},{"@type":"ListItem","position":2,"name":"Pomodoro","item":"https://www.godtimestudy.com.br/pages/pomodoro.html"}]}
     </script>
 </head>
-<body class="has-top-bar">
+<body class="method-page has-top-bar">
     <div class="background-gradient"></div>
     <header class="top-bar">
         <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -41,22 +41,18 @@
         <span id="langSelector"></span>
     </header>
     <div class="container">
+        <a href="index.html" class="back-link" data-i18n="backLinkText">← Voltar ao Hub</a>
         <div class="glass-card">
             <header class="header">
                 <h1 class="app-title">🍅 <span data-i18n="pomodoro">Pomodoro</span></h1>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <a href="index.html" class="icon-btn" data-i18n-aria-label="backToHub" aria-label="Voltar ao Hub" title="Voltar ao Hub">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M19 12H5M12 19l-7-7 7-7"/>
-                        </svg>
-                    </a>
-                    <a href="sobre.html" class="icon-btn" aria-label="Sobre o Pomodoro" title="Sobre a Técnica Pomodoro">
+                    <a href="sobre.html" class="icon-btn" aria-label="Sobre o Pomodoro" title="Sobre a Técnica Pomodoro" data-i18n-title="aboutPomodoro">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"></circle>
                             <path d="M12 16v-4M12 8h.01"></path>
                         </svg>
                     </a>
-                    <button class="icon-btn" id="settingsBtn" aria-label="Configurações">
+                    <button class="icon-btn" id="settingsBtn" aria-label="Configurações" data-i18n-aria-label="settingsTitle">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="3"></circle>
                             <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3m15.364-6.364l-4.243 4.243m-4.242 0L5.636 5.636m12.728 12.728l-4.243-4.243m-4.242 0L5.636 18.364"></path>
@@ -103,15 +99,15 @@
                     <div class="stat-value" id="totalCount">0</div>
                 </div>
             </div>
-            <p class="seo-outros-links">Outros métodos de estudo: <a href="index.html">Hub</a>, <a href="flashcards.html">Flashcards</a>, <a href="mapa-mental.html">Mapa Mental</a>.</p>
+            <p class="seo-outros-links">Saiba mais: <a href="pomodoro-online-gratis.html">Pomodoro online grátis (guia)</a>. Outros métodos: <a href="index.html">Hub</a>, <a href="flashcards.html">Flashcards</a>, <a href="mapa-mental.html">Mapa Mental</a>.</p>
         </div>
     </div>
 
     <div class="modal-overlay" id="settingsModal">
         <div class="modal glass-card">
             <div class="modal-header">
-                <h2>Configurações</h2>
-                <button class="icon-btn" id="closeSettingsBtn" aria-label="Fechar">
+                <h2 data-i18n="settingsTitle">Configurações</h2>
+                <button class="icon-btn" id="closeSettingsBtn" aria-label="Fechar" data-i18n-aria-label="modalClose">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -120,25 +116,25 @@
             </div>
             <div class="modal-content">
                 <div class="setting-group">
-                    <label for="pomodoroTime">Tempo do Pomodoro (minutos)</label>
+                    <label for="pomodoroTime" data-i18n="settingsPomodoroTime">Tempo do Pomodoro (minutos)</label>
                     <input type="number" id="pomodoroTime" min="1" max="60" value="25">
                 </div>
                 <div class="setting-group">
-                    <label for="shortBreakTime">Pausa Curta (minutos)</label>
+                    <label for="shortBreakTime" data-i18n="settingsShortBreak">Pausa Curta (minutos)</label>
                     <input type="number" id="shortBreakTime" min="1" max="60" value="5">
                 </div>
                 <div class="setting-group">
-                    <label for="longBreakTime">Pausa Longa (minutos)</label>
+                    <label for="longBreakTime" data-i18n="settingsLongBreak">Pausa Longa (minutos)</label>
                     <input type="number" id="longBreakTime" min="1" max="60" value="15">
                 </div>
                 <div class="setting-group">
-                    <label for="cyclesForLongBreak">Ciclos para Pausa Longa</label>
+                    <label for="cyclesForLongBreak" data-i18n="settingsCyclesForLongBreak">Ciclos para Pausa Longa</label>
                     <input type="number" id="cyclesForLongBreak" min="1" max="10" value="4">
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" id="saveSettingsBtn">Salvar</button>
-                <button class="btn btn-secondary" id="cancelSettingsBtn">Cancelar</button>
+                <button class="btn btn-primary" id="saveSettingsBtn" data-i18n="settingsSave">Salvar</button>
+                <button class="btn btn-secondary" id="cancelSettingsBtn" data-i18n="modalCancel">Cancelar</button>
             </div>
         </div>
     </div>

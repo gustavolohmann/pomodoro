@@ -41,7 +41,6 @@
                 </nav>
                 <div class="hub-title-wrap">
                     <h1 id="main-title" class="hub-main-title" data-i18n="hubTitle">Hub de Métodos de Estudo</h1>
-                    <p class="hub-intro-seo">Hub gratuito de métodos de estudo para foco, memorização e planejamento. Para estudantes e quem quer organizar o estudo. Use no navegador, sem cadastro.</p>
                     <p id="subtitle" class="hub-subtitle" data-i18n="hubSubtitle">Escolha seu método e comece a estudar com foco</p>
                 </div>
                 <div class="hub-header-actions">
@@ -81,6 +80,8 @@
                     </div>
                 </div>
             </div>
+            <p class="hub-stats-hint" id="statsHint" data-i18n="statsZeroHint" style="display: none;">Estude hoje para ver seu progresso</p>
+            <p class="hub-stats-hint hub-first-visit-hint" id="firstVisitHint" data-i18n="firstVisitHint" style="display: none;">Comece por um Pomodoro ou crie seus primeiros flashcards</p>
 
             <!-- Methods Grid -->
             <main class="hub-methods-grid" id="hubGrid">
@@ -166,6 +167,17 @@
                     </div>
                 </a>
             </main>
+
+            <!-- Guias / Conteúdos -->
+            <section class="hub-section fade-in" aria-labelledby="guias-title">
+                <h2 id="guias-title" class="hub-section-title">📖 <span data-i18n="guiasSectionTitle">Guias e conteúdos</span></h2>
+                <p class="hub-disclaimer" style="margin-bottom: 16px;" data-i18n="guiasSectionDesc">Entenda o método e use a ferramenta com mais proveito.</p>
+                <div class="hub-guias-links">
+                    <a href="o-que-e-mapa-mental.html" class="guia-link-card" data-i18n="guiaLinkMapaMental">O que é Mapa Mental?</a>
+                    <a href="pomodoro-online-gratis.html" class="guia-link-card" data-i18n="guiaLinkPomodoro">Pomodoro online grátis</a>
+                    <a href="como-estudar-com-flashcards.html" class="guia-link-card" data-i18n="guiaLinkFlashcards">Como estudar com Flashcards</a>
+                </div>
+            </section>
 
             <!-- Backup -->
             <div class="hub-backup fade-in">
@@ -274,6 +286,12 @@
                 var ivyDone = ivyTasks.filter(function(t) { return t.done; }).length;
                 var ivyEl = document.getElementById('statusIvyLee');
                 if (ivyEl) ivyEl.innerHTML = ivyDone + '/6 <span data-i18n="statusIvyComplete">completas</span>';
+
+                var hintEl = document.getElementById('statsHint');
+                var firstEl = document.getElementById('firstVisitHint');
+                var allZero = (streak === 0 && totalMin === 0 && (log.cardsReviewed || 0) === 0);
+                if (hintEl) { hintEl.style.display = allZero ? 'block' : 'none'; if (hintEl.style.display === 'block' && window.I18n && window.I18n.applyPage) window.I18n.applyPage(); }
+                if (firstEl && !localStorage.getItem('hub_first_visit_done')) { firstEl.style.display = allZero ? 'block' : 'none'; if (firstEl.style.display === 'block' && window.I18n && window.I18n.applyPage) window.I18n.applyPage(); }
             }
 
             if (document.readyState === 'loading') {
@@ -281,6 +299,10 @@
             } else {
                 loadStats();
             }
+            var hubGrid = document.getElementById('hubGrid');
+            if (hubGrid) hubGrid.addEventListener('click', function(e) {
+                if (e.target.closest('.method-card')) localStorage.setItem('hub_first_visit_done', '1');
+            });
         })();
 
         function t(key) { return window.I18n ? window.I18n.t(key) : key; }
@@ -373,18 +395,15 @@
                 showCancel: true,
                 onConfirm: function() {
                     HubData.resetHub();
-                    showToast(t('toastReset'));
+                    if (window.showToast) window.showToast(t('toastReset'));
+                    else {
+                        var el = document.getElementById('toast');
+                        if (el) { document.getElementById('toastMessage').textContent = t('toastReset'); el.classList.add('show'); setTimeout(function() { el.classList.remove('show'); }, 3000); }
+                    }
                     setTimeout(function() { location.reload(); }, 1000);
                 }
             });
         });
-
-        function showToast(msg) {
-            var el = document.getElementById('toast');
-            document.getElementById('toastMessage').textContent = msg;
-            el.classList.add('show');
-            setTimeout(function() { el.classList.remove('show'); }, 3000);
-        }
     </script>
 </body>
 </html>

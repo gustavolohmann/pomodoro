@@ -38,29 +38,29 @@
         <span id="langSelector"></span>
     </header>
     <div class="container">
-        <a href="index.html" class="back-link" data-i18n="backToHub">← Voltar ao Hub</a>
+        <a href="index.html" class="back-link" data-i18n="backLinkText">← Voltar ao Hub</a>
         <div class="glass-card">
             <div id="cardPomodoroStatus" class="card-pomodoro-status"></div>
             <header class="header">
-                <h1 class="app-title">✍️ Blurt Method</h1>
+                <h1 class="app-title">✍️ <span data-i18n="blurt">Blurt Method</span></h1>
             </header>
-            <p class="hub-intro">Diagnosticar lacunas de conhecimento. Escolha um tema, escreva tudo que lembra sem consulta, compare com o conteúdo base e identifique lacunas. Você pode criar flashcards a partir dos erros.</p>
+            <p class="hub-intro" data-i18n="blurtIntro">Diagnosticar lacunas de conhecimento. Escolha um tema, escreva tudo que lembra sem consulta, compare com o conteúdo base e identifique lacunas. Você pode criar flashcards a partir dos erros.</p>
 
             <div class="setting-group">
-                <label>Tema</label>
-                <input type="text" id="blurtTopic" placeholder="Ex: Ciclo de Krebs" class="task-text">
+                <label data-i18n="topic">Tema</label>
+                <input type="text" id="blurtTopic" class="task-text" data-i18n-placeholder="blurtTopicPlaceholder" placeholder="Ex: Ciclo de Krebs">
             </div>
             <div class="setting-group">
-                <label>Escreva tudo que lembra (sem consulta)</label>
+                <label data-i18n="writeWhatYouRemember">Escreva tudo que lembra (sem consulta)</label>
                 <div id="blurtContentRte"></div>
             </div>
             <div class="setting-group">
-                <label>Conteúdo base (para comparar – opcional)</label>
+                <label data-i18n="baseContent">Conteúdo base (para comparar – opcional)</label>
                 <div id="blurtBaseRte"></div>
             </div>
-            <button type="button" class="btn btn-primary" id="saveBlurtBtn">Salvar Blurt</button>
+            <button type="button" class="btn btn-primary" id="saveBlurtBtn" data-i18n="saveBlurt">Salvar Blurt</button>
 
-            <h2 class="hub-section-title" style="margin-top: 24px;">Registros anteriores</h2>
+            <h2 class="hub-section-title" style="margin-top: 24px;" data-i18n="previousRecords">Registros anteriores</h2>
             <div id="blurtList"></div>
             <p class="seo-outros-links">Outros métodos de estudo: <a href="index.html">Hub</a>, <a href="pomodoro.html">Pomodoro</a>, <a href="flashcards.html">Flashcards</a>.</p>
         </div>
@@ -75,21 +75,23 @@
     <script src="../js/rich-text-editor.js"></script>
     <script src="../js/modal.js"></script>
     <script>
-        var blurtContentRte = RichTextEditor.create(document.getElementById('blurtContentRte'), { placeholder: 'Escreva aqui...', minHeight: 160 });
-        var blurtBaseRte = RichTextEditor.create(document.getElementById('blurtBaseRte'), { placeholder: 'Cole o conteúdo de referência para comparar', minHeight: 100 });
+        function t(key) { return window.I18n ? window.I18n.t(key) : key; }
+        var blurtContentRte = RichTextEditor.create(document.getElementById('blurtContentRte'), { placeholder: t('writeWhatYouRemember'), minHeight: 160 });
+        var blurtBaseRte = RichTextEditor.create(document.getElementById('blurtBaseRte'), { placeholder: t('baseContent'), minHeight: 100 });
 
         function loadBlurts() {
             const items = HubData.getBlurts().slice(-20).reverse();
             const el = document.getElementById('blurtList');
             if (items.length === 0) {
-                el.innerHTML = '<p style="color: var(--text-secondary);">Nenhum registro ainda.</p>';
+                el.innerHTML = '<p style="color: var(--text-secondary);">' + (window.I18n ? window.I18n.t('noBlurtsYet') : 'Nenhum registro ainda.') + '</p>';
                 return;
             }
+            var linkText = window.I18n ? window.I18n.t('blurtCreateFlashcards') : 'Criar flashcards a partir deste tema →';
             el.innerHTML = items.map(b => `
                 <div style="padding: 16px; background: var(--secondary-color); border-radius: 12px; border: 1px solid var(--glass-border); margin-bottom: 12px;">
                     <div style="font-weight: 600; margin-bottom: 8px;">${escapeHtml(b.topic)} — ${b.date}</div>
                     <div class="rte-content-display" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${b.content || ''}</div>
-                    <a href="flashcards.html" style="display: inline-block; margin-top: 8px; color: var(--primary-color);">Criar flashcards a partir deste tema →</a>
+                    <a href="flashcards.html" style="display: inline-block; margin-top: 8px; color: var(--primary-color);">${escapeHtml(linkText)}</a>
                 </div>
             `).join('');
         }
@@ -101,7 +103,6 @@
             return div.innerHTML;
         }
 
-        function t(key) { return window.I18n ? window.I18n.t(key) : key; }
         document.getElementById('saveBlurtBtn').addEventListener('click', function() {
             const topic = document.getElementById('blurtTopic').value.trim();
             const content = blurtContentRte.getHTML();
@@ -111,14 +112,23 @@
                 Modal.show({ type: 'warning', title: t('modalWarning'), message: t('fillTopicAndContent'), showCancel: false, confirmLabel: t('modalOk') });
                 return;
             }
-            const items = HubData.getBlurts();
-            items.push({ id: 'b_' + Date.now(), topic, content, baseContent: base || undefined, date: HubData.getToday() });
-            HubData.setBlurts(items);
-            HubData.addActiveDay();
-            document.getElementById('blurtTopic').value = '';
-            blurtContentRte.clear();
-            blurtBaseRte.clear();
-            loadBlurts();
+            var btn = document.getElementById('saveBlurtBtn');
+            var origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = t('saving');
+            setTimeout(function() {
+                const items = HubData.getBlurts();
+                items.push({ id: 'b_' + Date.now(), topic, content, baseContent: base || undefined, date: HubData.getToday() });
+                HubData.setBlurts(items);
+                HubData.addActiveDay();
+                document.getElementById('blurtTopic').value = '';
+                blurtContentRte.clear();
+                blurtBaseRte.clear();
+                loadBlurts();
+                btn.disabled = false;
+                btn.textContent = origText;
+                if (window.showToast && window.I18n) window.showToast(window.I18n.t('toastSavedSuccess'));
+            }, 150);
         });
 
         loadBlurts();

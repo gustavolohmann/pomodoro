@@ -201,7 +201,8 @@ function saveSettings() {
     if (window.PomodoroEngine) window.PomodoroEngine.reset();
     syncDisplayFromEngine();
     closeSettings();
-    showToast('Configurações salvas!');
+    if (window.showToast && window.I18n) window.showToast(window.I18n.t('toastSavedSuccess'));
+    else showToast('Configurações salvas!');
 }
 
 function loadSettings() {

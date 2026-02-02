@@ -38,7 +38,7 @@
         <span id="langSelector"></span>
     </header>
     <div class="container">
-        <a href="index.html" class="back-link" data-i18n="backToHub">← Voltar ao Hub</a>
+        <a href="index.html" class="back-link" data-i18n="backLinkText">← Voltar ao Hub</a>
         <div class="glass-card">
             <div id="cardPomodoroStatus" class="card-pomodoro-status"></div>
             <header class="header">
@@ -145,9 +145,23 @@
             document.querySelectorAll('.task-remove').forEach(el => {
                 el.onclick = function() {
                     const id = this.dataset.id;
-                    let tasks = HubData.getIvyLee(today).filter(x => x.id !== id);
-                    HubData.setIvyLee(today, tasks);
-                    loadTasks();
+                    var tTitle = window.I18n ? window.I18n.t('modalConfirmDeleteTitle') : 'Confirmar exclusão';
+                    var tMsg = window.I18n ? window.I18n.t('modalConfirmDeleteTask') : 'Remover esta tarefa? Não é possível desfazer.';
+                    var tCancel = window.I18n ? window.I18n.t('modalCancel') : 'Cancelar';
+                    var tRemove = window.I18n ? window.I18n.t('modalRemove') : 'Remover';
+                    Modal.show({
+                        type: 'warning',
+                        title: tTitle,
+                        message: tMsg,
+                        showCancel: true,
+                        cancelLabel: tCancel,
+                        confirmLabel: tRemove,
+                        onConfirm: function() {
+                            var tasks = HubData.getIvyLee(today).filter(x => x.id !== id);
+                            HubData.setIvyLee(today, tasks);
+                            loadTasks();
+                        }
+                    });
                 };
             });
         }
@@ -165,14 +179,24 @@
                 Modal.show({ type: 'warning', title: t('modalWarning'), message: t('maxTasks'), showCancel: false, confirmLabel: t('modalOk') });
                 return;
             }
-            var descHtml = newTaskDescRte.getHTML();
-            tasks.push({ id: 'id_' + Date.now(), name: name, description: descHtml || '', done: false, order: tasks.length });
-            HubData.setIvyLee(today, tasks);
-            HubData.addActiveDay();
-            nameEl.value = '';
-            newTaskDescRte.clear();
-            nameEl.focus();
-            loadTasks();
+            var btn = document.getElementById('addTaskBtn');
+            var origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = (window.I18n ? window.I18n.t('saving') : 'Salvando...');
+            setTimeout(function() {
+                var descHtml = newTaskDescRte.getHTML();
+                var list = HubData.getIvyLee(today);
+                list.push({ id: 'id_' + Date.now(), name: name, description: descHtml || '', done: false, order: list.length });
+                HubData.setIvyLee(today, list);
+                HubData.addActiveDay();
+                nameEl.value = '';
+                newTaskDescRte.clear();
+                nameEl.focus();
+                loadTasks();
+                btn.disabled = false;
+                btn.textContent = origText;
+                if (window.showToast && window.I18n) window.showToast(window.I18n.t('toastSavedSuccess'));
+            }, 150);
         });
 
         loadTasks();
