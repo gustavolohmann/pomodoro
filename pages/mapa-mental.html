@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"WebApplication","name":"Editor de Mapa Mental - Hub de Estudo","description":"Crie mapas mentais online: nós, ligações e formas. Organize ideias visualmente no navegador, sem cadastro. Exporte em PNG e SVG.","url":"https://www.godtimestudy.com.br/pages/mapa-mental.html","applicationCategory":"EducationalApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"}}
+    {"@context":"https://schema.org","@type":"WebApplication","name":"Editor de Mapa Mental - Hub de Estudo","description":"Crie mapas mentais online: nós, ligações e formas. Organize ideias visualmente no navegador, sem cadastro. Exporte em PNG.","url":"https://www.godtimestudy.com.br/pages/mapa-mental.html","applicationCategory":"EducationalApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"}}
     </script>
     <script type="application/ld+json">
     {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Hub","item":"https://www.godtimestudy.com.br/pages/index.html"},{"@type":"ListItem","position":2,"name":"Mapa Mental","item":"https://www.godtimestudy.com.br/pages/mapa-mental.html"}]}
@@ -93,13 +93,9 @@
                     <span class="mindmap-btn-icon mindmap-icon-download"></span>
                     <span class="mindmap-btn-label" data-i18n="mindmapDownloadPng">Baixar mapa (PNG)</span>
                 </button>
-                <button type="button" class="mindmap-sidebar-btn mindmap-btn-download" id="mindmapDownloadSvg" data-export="svg">
-                    <span class="mindmap-btn-icon mindmap-icon-download"></span>
-                    <span class="mindmap-btn-label" data-i18n="mindmapDownloadSvg">Baixar mapa (SVG)</span>
-                </button>
             </div>
         </aside>
-        <div class="mindmap-canvas-wrap" id="mindmapCanvasWrap" role="application" aria-label="Editor de mapa mental: arraste nós, crie ligações entre conceitos e edite texto. Duplo clique no nó para editar. Exporte em PNG ou SVG.">
+        <div class="mindmap-canvas-wrap" id="mindmapCanvasWrap" role="application" aria-label="Editor de mapa mental: arraste nós, crie ligações entre conceitos e edite texto. Duplo clique no nó para editar. Exporte em PNG.">
             <svg class="mindmap-svg" id="mindmapSvg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <pattern id="mindmap-grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -133,8 +129,6 @@
                 });
                 var btnPng = document.getElementById('mindmapDownloadPng');
                 if (btnPng) btnPng.addEventListener('click', function () { Mindmap.exportToPng(); });
-                var btnSvg = document.getElementById('mindmapDownloadSvg');
-                if (btnSvg) btnSvg.addEventListener('click', function () { Mindmap.exportToSvg(); });
             }
         })();
     </script>

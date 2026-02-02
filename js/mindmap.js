@@ -345,6 +345,7 @@
         vis.setAttribute('x2', p2.x);
         vis.setAttribute('y2', p2.y);
         vis.setAttribute('class', 'mindmap-edge-line');
+        vis.setAttribute('marker-end', 'url(#' + ARROWHEAD_ID + ')');
         g.appendChild(vis);
     }
 
@@ -439,6 +440,27 @@
         canvasWrap.classList.toggle('pan-cursor', !!show);
     }
 
+    var ARROWHEAD_ID = 'mindmap-arrowhead';
+
+    function ensureArrowheadMarker() {
+        if (!svgEl) return;
+        var defs = svgEl.querySelector('defs');
+        if (!defs) return;
+        if (defs.querySelector('#' + ARROWHEAD_ID)) return;
+        var marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+        marker.setAttribute('id', ARROWHEAD_ID);
+        marker.setAttribute('markerWidth', '10');
+        marker.setAttribute('markerHeight', '8');
+        marker.setAttribute('refX', '9');
+        marker.setAttribute('refY', '4');
+        marker.setAttribute('orient', 'auto');
+        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M 0 0 L 8 4 L 0 8 Z');
+        path.setAttribute('fill', '#94a3b8');
+        marker.appendChild(path);
+        defs.appendChild(marker);
+    }
+
     function init(container) {
         if (!container) return;
         canvasWrap = container.querySelector('.mindmap-canvas-wrap');
@@ -447,6 +469,8 @@
         gEdges = svgEl.querySelector('.mindmap-edges');
         gNodes = svgEl.querySelector('.mindmap-nodes');
         if (!gEdges || !gNodes) return;
+
+        ensureArrowheadMarker();
 
         modeButtons = container.querySelectorAll('.mindmap-btn-mode') || [];
         shapeButtons = container.querySelectorAll('.mindmap-btn-shape') || [];
@@ -823,15 +847,76 @@
         '.mindmap-resize-handle{fill:#38bdf8;stroke:#f1f5f9;stroke-width:1px}' +
         '</style>';
 
+    var EXPORT_PADDING = 40;
+
+    /** Bounding box real do mapa: todos os nós + todas as arestas + padding. Usado para export SVG/PNG completo. */
+    function getExportBoundingBox() {
+        var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        var i, b, ep;
+        for (i = 0; i < nodes.length; i++) {
+            b = getNodeBounds(nodes[i]);
+            minX = Math.min(minX, b.left);
+            minY = Math.min(minY, b.top);
+            maxX = Math.max(maxX, b.right);
+            maxY = Math.max(maxY, b.bottom);
+        }
+        for (i = 0; i < edges.length; i++) {
+            ep = getEdgeEndpoints(edges[i]);
+            if (!ep) continue;
+            minX = Math.min(minX, ep.p1.x, ep.p2.x);
+            minY = Math.min(minY, ep.p1.y, ep.p2.y);
+            maxX = Math.max(maxX, ep.p1.x, ep.p2.x);
+            maxY = Math.max(maxY, ep.p1.y, ep.p2.y);
+        }
+        if (minX === Infinity) {
+            minX = VIEWBOX_DEFAULT.x;
+            minY = VIEWBOX_DEFAULT.y;
+            maxX = VIEWBOX_DEFAULT.x + VIEWBOX_DEFAULT.w;
+            maxY = VIEWBOX_DEFAULT.y + VIEWBOX_DEFAULT.h;
+        }
+        var pad = EXPORT_PADDING;
+        var x = minX - pad;
+        var y = minY - pad;
+        var w = Math.max(100, (maxX - minX) + 2 * pad);
+        var h = Math.max(100, (maxY - minY) + 2 * pad);
+        return { x: x, y: y, w: w, h: h };
+    }
+
+    /**
+     * Export SVG com viewBox 0 0 w h e conteúdo "flattened":
+     * agrupa edges+nodes em <g transform="translate(-ox,-oy)"> para que o bounding box
+     * real fique na origem. Assim todos os viewers (Figma, Illustrator, Inkscape, browser)
+     * mostram 100% do mapa sem conteúdo fora da área visível.
+     */
     function buildExportSvgString() {
         if (!svgEl) return '';
         commitEditingNode();
         render();
+        var exportBox = getExportBoundingBox();
         var clone = svgEl.cloneNode(true);
-        clone.setAttribute('width', viewBox.w);
-        clone.setAttribute('height', viewBox.h);
-        clone.setAttribute('viewBox', viewBox.x + ' ' + viewBox.y + ' ' + viewBox.w + ' ' + viewBox.h);
+        var gridRect = clone.querySelector('.mindmap-grid-bg');
+        if (gridRect) gridRect.parentNode.removeChild(gridRect);
+        var gEdgesClone = clone.querySelector('.mindmap-edges');
+        var gNodesClone = clone.querySelector('.mindmap-nodes');
+        if (gEdgesClone && gNodesClone) {
+            var wrap = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            wrap.setAttribute('transform', 'translate(' + (-exportBox.x) + ',' + (-exportBox.y) + ')');
+            gEdgesClone.parentNode.insertBefore(wrap, gEdgesClone);
+            wrap.appendChild(gEdgesClone);
+            wrap.appendChild(gNodesClone);
+        }
+        var bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bgRect.setAttribute('x', '0');
+        bgRect.setAttribute('y', '0');
+        bgRect.setAttribute('width', String(exportBox.w));
+        bgRect.setAttribute('height', String(exportBox.h));
+        bgRect.setAttribute('fill', '#0f172a');
+        clone.insertBefore(bgRect, clone.firstChild);
         clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        clone.setAttribute('viewBox', '0 0 ' + exportBox.w + ' ' + exportBox.h);
+        clone.setAttribute('width', String(exportBox.w));
+        clone.setAttribute('height', String(exportBox.h));
+        clone.setAttribute('preserveAspectRatio', 'xMinYMin meet');
         var defs = clone.querySelector('defs');
         if (!defs) {
             defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -860,11 +945,16 @@
         URL.revokeObjectURL(url);
     }
 
+    var EXPORT_PNG_SCALE = 2;
+
     function exportToPng() {
+        commitEditingNode();
+        render();
+        var exportBox = getExportBoundingBox();
         var str = buildExportSvgString();
         if (!str) return;
-        var w = Math.round(viewBox.w);
-        var h = Math.round(viewBox.h);
+        var w = Math.round(exportBox.w * EXPORT_PNG_SCALE);
+        var h = Math.round(exportBox.h * EXPORT_PNG_SCALE);
         var blob = new Blob([str], { type: 'image/svg+xml;charset=utf-8' });
         var url = URL.createObjectURL(blob);
         var img = new Image();
@@ -875,7 +965,9 @@
             var ctx = canvas.getContext('2d');
             ctx.fillStyle = '#0f172a';
             ctx.fillRect(0, 0, w, h);
-            ctx.drawImage(img, 0, 0, w, h);
+            var sw = img.naturalWidth || exportBox.w;
+            var sh = img.naturalHeight || exportBox.h;
+            ctx.drawImage(img, 0, 0, sw, sh, 0, 0, w, h);
             var dataUrl = canvas.toDataURL('image/png');
             var a = document.createElement('a');
             a.href = dataUrl;
